@@ -1,0 +1,10 @@
+[Xfce Panel]
+Type=X-XFCE-PanelPlugin
+Encoding=UTF-8
+_Name=DDC Plugin
+_Comment=Control monitor settings from the Xfce panel
+Icon=video-display
+X-XFCE-Module=ddcplugin
+X-XFCE-Internal=false
+X-XFCE-Unique=true
+X-XFCE-API=2.0

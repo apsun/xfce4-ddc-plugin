@@ -29,3 +29,5 @@ po/POTFILES
 stamp-*
 m4
 *~
+.cache
+compile_commands.json

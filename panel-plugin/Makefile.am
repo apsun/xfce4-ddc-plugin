@@ -17,6 +17,7 @@ libddcplugin_la_CFLAGS = \
 	$(LIBXFCE4UTIL_CFLAGS) \
 	$(LIBXFCE4UI_CFLAGS) \
 	$(LIBXFCE4PANEL_CFLAGS) \
+	$(KEYBINDER_CFLAGS) \
 	$(PLATFORM_CFLAGS)
 
 libddcplugin_la_LDFLAGS = \
@@ -29,7 +30,8 @@ libddcplugin_la_LDFLAGS = \
 libddcplugin_la_LIBADD = \
 	$(LIBXFCE4UTIL_LIBS) \
 	$(LIBXFCE4UI_LIBS) \
-	$(LIBXFCE4PANEL_LIBS)
+	$(LIBXFCE4PANEL_LIBS) \
+	$(KEYBINDER_LIBS)
 
 desktopdir = \
 	$(datadir)/xfce4/panel/plugins

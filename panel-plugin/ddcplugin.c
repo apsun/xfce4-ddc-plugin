@@ -512,7 +512,7 @@ ddcplugin_free(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
     gtk_widget_destroy(ddcplugin->widget);
 
     // Free the plugin object
-    g_slice_free(DdcPlugin, ddcplugin);
+    free(ddcplugin);
 
     eprintf("xfce4-ddc-plugin finalized\n");
 }

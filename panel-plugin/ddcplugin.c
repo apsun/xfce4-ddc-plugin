@@ -275,13 +275,20 @@ ddcplugin_update_thread(void *arg)
     DdcState current_state = desired_state;
 
     pthread_mutex_lock(&display->state_mutex);
-    while (!display->exit) {
-        while (ddcplugin_state_eq(&display->desired_state, &current_state)) {
+    while (1) {
+        // Wait for exit signal or state update
+        while (!display->exit && ddcplugin_state_eq(&display->desired_state, &current_state)) {
             pthread_cond_wait(&display->update_cond, &display->state_mutex);
         }
+
+        if (display->exit) {
+            break;
+        }
+
         desired_state = display->desired_state;
         pthread_mutex_unlock(&display->state_mutex);
 
+        // Write desired values to display
         rc = ddcplugin_display_write_values(display, &desired_state, &current_state);
         if (rc != 0) {
             eprintf(

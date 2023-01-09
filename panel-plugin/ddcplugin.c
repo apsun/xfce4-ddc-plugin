@@ -5,6 +5,7 @@
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include <keybinder.h>
+#include <ddcutil_c_api.h>
 
 typedef struct {
     XfcePanelPlugin *plugin;
@@ -76,6 +77,9 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     {
         fprintf(stderr, "failed to bind keys - already in use?\n");
     }
+
+    fprintf(stderr, "xfce4-ddc-plugin initialized\n");
+    fprintf(stderr, "ddcutil version: %s\n", ddca_ddcutil_version_string());
 }
 
 XFCE_PANEL_PLUGIN_REGISTER(ddcplugin_new);

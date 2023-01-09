@@ -26,11 +26,11 @@ typedef struct DdcValue {
     uint16_t max;
 } DdcValue;
 
-typedef struct DdcDisplayState {
+typedef struct DdcState {
     DdcValue brightness;
     DdcValue volume;
     DdcValue muted;
-} DdcDisplayState;
+} DdcState;
 
 typedef struct DdcDisplay {
     struct DdcDisplay *next;
@@ -41,7 +41,7 @@ typedef struct DdcDisplay {
     pthread_t update_thread;
     pthread_cond_t update_cond;
     pthread_mutex_t state_mutex;
-    DdcDisplayState desired_state;
+    DdcState desired_state;
     bool exit;
 } DdcDisplay;
 
@@ -123,6 +123,15 @@ ddcplugin_value_modify(DdcValue *value, int delta)
     value->current = new_value;
 }
 
+static bool
+ddcplugin_state_eq(DdcState *a, DdcState *b)
+{
+    return
+        a->brightness.current == b->brightness.current &&
+        a->volume.current == b->volume.current &&
+        a->muted.current == b->muted.current;
+}
+
 static DDCA_Status
 ddcplugin_display_read_values(DdcDisplay *display)
 {
@@ -186,17 +195,19 @@ ddcplugin_display_read_values(DdcDisplay *display)
 }
 
 static DDCA_Status
-ddcplugin_display_write_values(DdcDisplay *display, DdcDisplayState *current_state)
+ddcplugin_display_write_values(
+    DdcDisplay *display,
+    const DdcState *desired_state,
+    DdcState *current_state)
 {
     DDCA_Status rc;
-    DdcDisplayState *desired_state = &display->desired_state;
 
     // Brightness
     if (desired_state->brightness.current != current_state->brightness.current) {
         rc = ddcplugin_raw_write_value(
             display->handle,
             VCP_FEATURE_CODE_BRIGHTNESS,
-            display->desired_state.brightness.current);
+            desired_state->brightness.current);
         if (rc != 0) {
             eprintf(
                 "failed to write brightness of display %s: %s\n",
@@ -207,8 +218,8 @@ ddcplugin_display_write_values(DdcDisplay *display, DdcDisplayState *current_sta
         eprintf(
             "set brightness of display %s to %d/%d\n",
             display->info.sn,
-            display->desired_state.brightness.current,
-            display->desired_state.brightness.max);
+            desired_state->brightness.current,
+            desired_state->brightness.max);
     }
 
     // Volume
@@ -216,7 +227,7 @@ ddcplugin_display_write_values(DdcDisplay *display, DdcDisplayState *current_sta
         rc = ddcplugin_raw_write_value(
             display->handle,
             VCP_FEATURE_CODE_VOLUME,
-            display->desired_state.volume.current);
+            desired_state->volume.current);
         if (rc != 0) {
             eprintf(
                 "failed to write volume of display %s: %s\n",
@@ -227,8 +238,8 @@ ddcplugin_display_write_values(DdcDisplay *display, DdcDisplayState *current_sta
         eprintf(
             "set volume of display %s to %d/%d\n",
             display->info.sn,
-            display->desired_state.volume.current,
-            display->desired_state.volume.max);
+            desired_state->volume.current,
+            desired_state->volume.max);
     }
 
     // Muted
@@ -236,7 +247,7 @@ ddcplugin_display_write_values(DdcDisplay *display, DdcDisplayState *current_sta
         rc = ddcplugin_raw_write_value(
             display->handle,
             VCP_FEATURE_CODE_MUTED,
-            display->desired_state.muted.current);
+            desired_state->muted.current);
         if (rc != 0) {
             eprintf(
                 "failed to write mute status of display %s: %s\n",
@@ -247,11 +258,11 @@ ddcplugin_display_write_values(DdcDisplay *display, DdcDisplayState *current_sta
         eprintf(
             "set mute status of display %s to %d/%d\n",
             display->info.sn,
-            display->desired_state.muted.current,
-            display->desired_state.muted.max);
+            desired_state->muted.current,
+            desired_state->muted.max);
     }
 
-    *current_state = display->desired_state;
+    *current_state = *desired_state;
     return 0;
 }
 
@@ -260,18 +271,26 @@ ddcplugin_update_thread(void *arg)
 {
     DDCA_Status rc;
     DdcDisplay *display = arg;
-    DdcDisplayState current_state = display->desired_state;
+    DdcState desired_state = display->desired_state;
+    DdcState current_state = desired_state;
 
     pthread_mutex_lock(&display->state_mutex);
     while (!display->exit) {
-        pthread_cond_wait(&display->update_cond, &display->state_mutex);
-        rc = ddcplugin_display_write_values(display, &current_state);
+        while (ddcplugin_state_eq(&display->desired_state, &current_state)) {
+            pthread_cond_wait(&display->update_cond, &display->state_mutex);
+        }
+        desired_state = display->desired_state;
+        pthread_mutex_unlock(&display->state_mutex);
+
+        rc = ddcplugin_display_write_values(display, &desired_state, &current_state);
         if (rc != 0) {
             eprintf(
                 "failed to write desired state of display %s: %s\n",
                 display->info.sn,
                 ddca_rc_desc(rc));
         }
+
+        pthread_mutex_lock(&display->state_mutex);
     }
     pthread_mutex_unlock(&display->state_mutex);
     return NULL;

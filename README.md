@@ -23,7 +23,8 @@ Add your user to the `i2c` group:
 sudo usermod -aG i2c ${USER}
 ```
 
-Reboot to make the above changes take effect. Then, build and install the plugin:
+Reboot to make the above changes take effect. Then, build and install the
+plugin:
 
 ```Bash
 ./autogen.sh --prefix=/usr
@@ -31,11 +32,17 @@ make
 sudo make install
 ```
 
-"DDC Plugin" should now show up in the available Xfce panel items.
+"DDC Plugin" should now show up in the available Xfce panel items. To view
+the plugin logs, run `xfce4-panel` in debug mode:
 
-Note: if the plugin crashes on load, it's probably because another application
-has registered the volume/brightness hotkeys. Try stopping/uninstalling
-`xfce4-pulseaudio-plugin` (volume) and `xfce4-power-manager` (brightness).
+```Bash
+killall xfce4-panel; PANEL_DEBUG=1 xfce4-panel
+```
+
+Note: if the plugin crashes on load, it's probably because another
+application has registered the volume/brightness hotkeys. Try
+stopping/uninstalling `xfce4-pulseaudio-plugin` (volume) and
+`xfce4-power-manager` (brightness).
 
 You can also recompile the plugin with `ENABLE_KEYBIND_BRIGHTNESS` or
 `ENABLE_KEYBIND_VOLUME` set to `0` to disable the hotkeys.

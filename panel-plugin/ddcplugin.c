@@ -13,7 +13,7 @@
 #include <keybinder.h>
 #include <ddcutil_c_api.h>
 
-#define ENABLE_KEYBIND_BRIGHTNESS 0
+#define ENABLE_KEYBIND_BRIGHTNESS 1
 #define ENABLE_KEYBIND_VOLUME 1
 
 #define STEP_BRIGHTNESS 5

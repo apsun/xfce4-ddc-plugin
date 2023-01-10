@@ -62,6 +62,17 @@ eprintf(const char *fmt, ...)
     va_end(args);
 }
 
+static void * __attribute__((malloc))
+xmalloc(size_t size)
+{
+    void *ret = malloc(size);
+    if (ret == NULL) {
+        eprintf("out of memory\n");
+        abort();
+    }
+    return ret;
+}
+
 static DdcDisplay *
 ddcplugin_pick_display(DdcPlugin *ddcplugin)
 {
@@ -435,11 +446,7 @@ ddcplugin_acquire_displays(DdcPlugin *ddcplugin)
         eprintf("detected display %s (model: %s)\n", info->sn, info->model_name);
 
         // Create the display object
-        display = malloc(sizeof(*display));
-        if (display == NULL) {
-            eprintf("failed to allocate memory for display %s\n", info->sn);
-            goto error;
-        }
+        display = xmalloc(sizeof(*display));
         display->next = ddcplugin->displays;
         ddcplugin->displays = display;
         display->info = *info;
@@ -488,7 +495,7 @@ ddcplugin_acquire_displays(DdcPlugin *ddcplugin)
 
 error:
     ddcplugin_release_displays(ddcplugin);
-    return;
+    abort();
 }
 
 static void
@@ -522,9 +529,14 @@ ddcplugin_keybind_register(DdcPlugin *ddcplugin)
         false)
     {
         eprintf("failed to bind keys - already in use?\n");
-        ddcplugin_keybind_unregister();
-        abort();
+        goto error;
     }
+
+    return;
+
+error:
+    ddcplugin_keybind_unregister();
+    abort();
 }
 
 static void
@@ -554,7 +566,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     xfce_textdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR, "UTF-8");
 
     // Create the plugin object
-    ddcplugin = malloc(sizeof(*ddcplugin));
+    ddcplugin = xmalloc(sizeof(*ddcplugin));
     ddcplugin->plugin = plugin;
     ddcplugin->widget = NULL;
     ddcplugin->displays = NULL;

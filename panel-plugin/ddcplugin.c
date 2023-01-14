@@ -53,32 +53,12 @@ typedef struct DdcPlugin {
     DdcDisplay *displays;
 } DdcPlugin;
 
-static void __attribute__((format(printf, 1, 2)))
-eprintf(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-}
-
-static void * __attribute__((malloc))
-xmalloc(size_t size)
-{
-    void *ret = malloc(size);
-    if (ret == NULL) {
-        eprintf("out of memory\n");
-        abort();
-    }
-    return ret;
-}
-
 static DdcDisplay *
 ddcplugin_pick_display(DdcPlugin *ddcplugin)
 {
     DdcDisplay *display = ddcplugin->displays;
     if (display == NULL) {
-        eprintf("no displays detected\n");
+        g_warning("no displays detected");
         return NULL;
     }
 
@@ -87,7 +67,7 @@ ddcplugin_pick_display(DdcPlugin *ddcplugin)
     }
 
     // TODO: handle multiple monitors
-    eprintf("more than one display detected\n");
+    g_warning("more than one display detected");
     return display;
 }
 
@@ -156,14 +136,14 @@ ddcplugin_display_read_values(DdcDisplay *display)
         VCP_FEATURE_CODE_BRIGHTNESS,
         &display->desired_state.brightness);
     if (rc != 0) {
-        eprintf(
-            "failed to read brightness of display %s: %s\n",
+        g_warning(
+            "failed to read brightness of display %s: %s",
             display->info.sn,
             ddca_rc_desc(rc));
         return rc;
     }
-    eprintf(
-        "current brightness of display %s is %d/%d\n",
+    g_info(
+        "current brightness of display %s is %d/%d",
         display->info.sn,
         display->desired_state.brightness.current,
         display->desired_state.brightness.max);
@@ -174,14 +154,14 @@ ddcplugin_display_read_values(DdcDisplay *display)
         VCP_FEATURE_CODE_VOLUME,
         &display->desired_state.volume);
     if (rc != 0) {
-        eprintf(
-            "failed to read volume of display %s: %s\n",
+        g_warning(
+            "failed to read volume of display %s: %s",
             display->info.sn,
             ddca_rc_desc(rc));
         return rc;
     }
-    eprintf(
-        "current volume of display %s is %d/%d\n",
+    g_info(
+        "current volume of display %s is %d/%d",
         display->info.sn,
         display->desired_state.volume.current,
         display->desired_state.volume.max);
@@ -192,14 +172,14 @@ ddcplugin_display_read_values(DdcDisplay *display)
         VCP_FEATURE_CODE_MUTED,
         &display->desired_state.muted);
     if (rc != 0) {
-        eprintf(
-            "failed to read mute status of display %s: %s\n",
+        g_warning(
+            "failed to read mute status of display %s: %s",
             display->info.sn,
             ddca_rc_desc(rc));
         return rc;
     }
-    eprintf(
-        "current mute status of display %s is %d/%d\n",
+    g_info(
+        "current mute status of display %s is %d/%d",
         display->info.sn,
         display->desired_state.muted.current,
         display->desired_state.muted.max);
@@ -222,14 +202,14 @@ ddcplugin_display_write_values(
             VCP_FEATURE_CODE_BRIGHTNESS,
             desired_state->brightness.current);
         if (rc != 0) {
-            eprintf(
-                "failed to write brightness of display %s: %s\n",
+            g_warning(
+                "failed to write brightness of display %s: %s",
                 display->info.sn,
                 ddca_rc_desc(rc));
             return rc;
         }
-        eprintf(
-            "set brightness of display %s to %d/%d\n",
+        g_info(
+            "set brightness of display %s to %d/%d",
             display->info.sn,
             desired_state->brightness.current,
             desired_state->brightness.max);
@@ -242,14 +222,14 @@ ddcplugin_display_write_values(
             VCP_FEATURE_CODE_VOLUME,
             desired_state->volume.current);
         if (rc != 0) {
-            eprintf(
-                "failed to write volume of display %s: %s\n",
+            g_warning(
+                "failed to write volume of display %s: %s",
                 display->info.sn,
                 ddca_rc_desc(rc));
             return rc;
         }
-        eprintf(
-            "set volume of display %s to %d/%d\n",
+        g_info(
+            "set volume of display %s to %d/%d",
             display->info.sn,
             desired_state->volume.current,
             desired_state->volume.max);
@@ -262,14 +242,14 @@ ddcplugin_display_write_values(
             VCP_FEATURE_CODE_MUTED,
             desired_state->muted.current);
         if (rc != 0) {
-            eprintf(
-                "failed to write mute status of display %s: %s\n",
+            g_warning(
+                "failed to write mute status of display %s: %s",
                 display->info.sn,
                 ddca_rc_desc(rc));
             return rc;
         }
-        eprintf(
-            "set mute status of display %s to %d/%d\n",
+        g_info(
+            "set mute status of display %s to %d/%d",
             display->info.sn,
             desired_state->muted.current,
             desired_state->muted.max);
@@ -304,8 +284,8 @@ ddcplugin_update_thread(void *arg)
         // Write desired values to display
         rc = ddcplugin_display_write_values(display, &desired_state, &current_state);
         if (rc != 0) {
-            eprintf(
-                "failed to write desired state of display %s: %s\n",
+            g_warning(
+                "failed to write desired state of display %s: %s",
                 display->info.sn,
                 ddca_rc_desc(rc));
         }
@@ -414,15 +394,15 @@ ddcplugin_release_displays(DdcPlugin *ddcplugin)
         if (display->handle != NULL) {
             rc = ddca_close_display(display->handle);
             if (rc != 0) {
-                eprintf(
-                    "failed to close display %s: %s\n",
+                g_warning(
+                    "failed to close display %s: %s",
                     display->info.sn,
                     ddca_rc_desc(rc));
             }
         }
 
         ddcplugin->displays = display->next;
-        free(display);
+        g_free(display);
     }
 }
 
@@ -435,7 +415,7 @@ ddcplugin_acquire_displays(DdcPlugin *ddcplugin)
     // Get list of available displays
     rc = ddca_get_display_info_list2(false, &info_list);
     if (rc != 0) {
-        eprintf("failed to get display list: %s\n", ddca_rc_desc(rc));
+        g_warning("failed to get display list: %s", ddca_rc_desc(rc));
         goto error;
     }
 
@@ -443,10 +423,10 @@ ddcplugin_acquire_displays(DdcPlugin *ddcplugin)
         int err;
         DdcDisplay *display;
         DDCA_Display_Info *info = &info_list->info[i];
-        eprintf("detected display %s (model: %s)\n", info->sn, info->model_name);
+        g_info("detected display %s (model: %s)", info->sn, info->model_name);
 
         // Create the display object
-        display = xmalloc(sizeof(*display));
+        display = g_malloc(sizeof(*display));
         display->next = ddcplugin->displays;
         ddcplugin->displays = display;
         display->info = *info;
@@ -465,15 +445,15 @@ ddcplugin_acquire_displays(DdcPlugin *ddcplugin)
         // Acquire display handle
         rc = ddca_open_display2(display->info.dref, true, &display->handle);
         if (rc != 0) {
-            eprintf("failed to open display %s: %s\n", info->sn, ddca_rc_desc(rc));
+            g_warning("failed to open display %s: %s", info->sn, ddca_rc_desc(rc));
             goto error;
         }
 
         // Read current display state
         rc = ddcplugin_display_read_values(display);
         if (rc != 0) {
-            eprintf(
-                "failed to load current values from display %s: %s\n",
+            g_warning(
+                "failed to load current values from display %s: %s",
                 info->sn,
                 ddca_rc_desc(rc));
             goto error;
@@ -486,7 +466,7 @@ ddcplugin_acquire_displays(DdcPlugin *ddcplugin)
             ddcplugin_update_thread,
             display);
         if (err != 0) {
-            eprintf("failed to create update thread: %s\n", strerror(err));
+            g_warning("failed to create update thread: %s", strerror(err));
             goto error;
         }
     }
@@ -524,7 +504,7 @@ ddcplugin_keybind_register_brightness(DdcPlugin *ddcplugin)
     if (!keybinder_bind("XF86MonBrightnessUp", ddcplugin_keybind_brightness_up, ddcplugin) ||
         !keybinder_bind("XF86MonBrightnessDown", ddcplugin_keybind_brightness_down, ddcplugin))
     {
-        eprintf("failed to bind brightness keys - already in use?\n");
+        g_warning("failed to bind brightness keys - already in use?");
         goto error;
     }
 
@@ -544,7 +524,7 @@ ddcplugin_keybind_register_volume(DdcPlugin *ddcplugin)
         !keybinder_bind("XF86AudioLowerVolume", ddcplugin_keybind_volume_down, ddcplugin) ||
         !keybinder_bind("XF86AudioMute", ddcplugin_keybind_mute_toggle, ddcplugin))
     {
-        eprintf("failed to bind volume keys - already in use?\n");
+        g_warning("failed to bind volume keys - already in use?");
         goto error;
     }
 
@@ -570,9 +550,9 @@ ddcplugin_free(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
     gtk_widget_destroy(ddcplugin->widget);
 
     // Free the plugin object
-    free(ddcplugin);
+    g_free(ddcplugin);
 
-    eprintf("xfce4-ddc-plugin finalized\n");
+    g_info("xfce4-ddc-plugin finalized");
 }
 
 static void
@@ -584,7 +564,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     xfce_textdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR, "UTF-8");
 
     // Create the plugin object
-    ddcplugin = xmalloc(sizeof(*ddcplugin));
+    ddcplugin = g_malloc(sizeof(*ddcplugin));
     ddcplugin->plugin = plugin;
     ddcplugin->widget = NULL;
     ddcplugin->displays = NULL;
@@ -604,7 +584,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     ddcplugin_keybind_register_brightness(ddcplugin);
     ddcplugin_keybind_register_volume(ddcplugin);
 
-    eprintf("xfce4-ddc-plugin initialized\n");
+    g_info("xfce4-ddc-plugin initialized");
 }
 
 XFCE_PANEL_PLUGIN_REGISTER(ddcplugin_new);

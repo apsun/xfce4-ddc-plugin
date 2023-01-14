@@ -33,10 +33,10 @@ sudo make install
 ```
 
 "DDC Plugin" should now show up in the available Xfce panel items. To view
-the plugin logs, run `xfce4-panel` in debug mode:
+the plugin logs, run `xfce4-panel` with `G_MESSAGES_DEBUG` set:
 
 ```Bash
-killall xfce4-panel; PANEL_DEBUG=1 xfce4-panel
+killall xfce4-panel; G_MESSAGES_DEBUG=xfce4-ddc-plugin xfce4-panel
 ```
 
 Note: if the plugin crashes on load, it's probably because another

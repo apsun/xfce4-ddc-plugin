@@ -499,12 +499,17 @@ error:
 }
 
 static void
-ddcplugin_keybind_unregister(void)
+ddcplugin_keybind_unregister_brightness(void)
 {
 #if ENABLE_KEYBIND_BRIGHTNESS
     keybinder_unbind("XF86MonBrightnessUp", ddcplugin_keybind_brightness_up);
     keybinder_unbind("XF86MonBrightnessDown", ddcplugin_keybind_brightness_down);
 #endif
+}
+
+static void
+ddcplugin_keybind_unregister_volume(void)
+{
 #if ENABLE_KEYBIND_VOLUME
     keybinder_unbind("XF86AudioRaiseVolume", ddcplugin_keybind_volume_up);
     keybinder_unbind("XF86AudioLowerVolume", ddcplugin_keybind_volume_down);
@@ -513,37 +518,50 @@ ddcplugin_keybind_unregister(void)
 }
 
 static void
-ddcplugin_keybind_register(DdcPlugin *ddcplugin)
+ddcplugin_keybind_register_brightness(DdcPlugin *ddcplugin)
 {
-    keybinder_init();
-    if (
 #if ENABLE_KEYBIND_BRIGHTNESS
-        !keybinder_bind("XF86MonBrightnessUp", ddcplugin_keybind_brightness_up, ddcplugin) ||
-        !keybinder_bind("XF86MonBrightnessDown", ddcplugin_keybind_brightness_down, ddcplugin) ||
-#endif
-#if ENABLE_KEYBIND_VOLUME
-        !keybinder_bind("XF86AudioRaiseVolume", ddcplugin_keybind_volume_up, ddcplugin) ||
-        !keybinder_bind("XF86AudioLowerVolume", ddcplugin_keybind_volume_down, ddcplugin) ||
-        !keybinder_bind("XF86AudioMute", ddcplugin_keybind_mute_toggle, ddcplugin) ||
-#endif
-        false)
+    if (!keybinder_bind("XF86MonBrightnessUp", ddcplugin_keybind_brightness_up, ddcplugin) ||
+        !keybinder_bind("XF86MonBrightnessDown", ddcplugin_keybind_brightness_down, ddcplugin))
     {
-        eprintf("failed to bind keys - already in use?\n");
+        eprintf("failed to bind brightness keys - already in use?\n");
         goto error;
     }
 
     return;
 
 error:
-    ddcplugin_keybind_unregister();
+    ddcplugin_keybind_unregister_brightness();
     abort();
+#endif
+}
+
+static void
+ddcplugin_keybind_register_volume(DdcPlugin *ddcplugin)
+{
+#if ENABLE_KEYBIND_VOLUME
+    if (!keybinder_bind("XF86AudioRaiseVolume", ddcplugin_keybind_volume_up, ddcplugin) ||
+        !keybinder_bind("XF86AudioLowerVolume", ddcplugin_keybind_volume_down, ddcplugin) ||
+        !keybinder_bind("XF86AudioMute", ddcplugin_keybind_mute_toggle, ddcplugin))
+    {
+        eprintf("failed to bind volume keys - already in use?\n");
+        goto error;
+    }
+
+    return;
+
+error:
+    ddcplugin_keybind_unregister_volume();
+    abort();
+#endif
 }
 
 static void
 ddcplugin_free(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
 {
     // Unregister keybinds
-    ddcplugin_keybind_unregister();
+    ddcplugin_keybind_unregister_brightness();
+    ddcplugin_keybind_unregister_volume();
 
     // Release display resources
     ddcplugin_release_displays(ddcplugin);
@@ -582,7 +600,9 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     ddcplugin_acquire_displays(ddcplugin);
 
     // Register keybinds
-    ddcplugin_keybind_register(ddcplugin);
+    keybinder_init();
+    ddcplugin_keybind_register_brightness(ddcplugin);
+    ddcplugin_keybind_register_volume(ddcplugin);
 
     eprintf("xfce4-ddc-plugin initialized\n");
 }

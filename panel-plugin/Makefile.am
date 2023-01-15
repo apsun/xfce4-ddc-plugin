@@ -13,7 +13,9 @@ plugindir = \
 libddcplugin_la_SOURCES = \
 	ddcplugin.c \
 	ddcplugin_display.c \
-	ddcplugin_display.h
+	ddcplugin_display.h \
+	ddcplugin_settings.c \
+	ddcplugin_settings.h
 
 libddcplugin_la_CFLAGS = \
 	$(LIBXFCE4UTIL_CFLAGS) \

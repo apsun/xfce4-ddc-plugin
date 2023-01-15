@@ -6,15 +6,11 @@
 #include <libxfce4panel/libxfce4panel.h>
 #include <keybinder.h>
 #include "ddcplugin_display.h"
-
-#define ENABLE_KEYBIND_BRIGHTNESS 1
-#define ENABLE_KEYBIND_VOLUME 1
-
-#define STEP_BRIGHTNESS 5
-#define STEP_VOLUME 5
+#include "ddcplugin_settings.h"
 
 typedef struct {
     XfcePanelPlugin *plugin;
+    DdcPluginSettings settings;
     GtkWidget *widget;
     DdcDisplay *displays;
 } DdcPlugin;
@@ -46,7 +42,7 @@ ddcplugin_keybind_brightness_up(const char *keystring, void *plugin)
         return;
     }
 
-    ddcplugin_display_modify_brightness(display, STEP_BRIGHTNESS);
+    ddcplugin_display_modify_brightness(display, ddcplugin->settings.step_size_brightness);
 }
 
 static void __attribute__((unused))
@@ -58,7 +54,7 @@ ddcplugin_keybind_brightness_down(const char *keystring, void *plugin)
         return;
     }
 
-    ddcplugin_display_modify_brightness(display, -STEP_BRIGHTNESS);
+    ddcplugin_display_modify_brightness(display, -ddcplugin->settings.step_size_brightness);
 }
 
 static void __attribute__((unused))
@@ -70,7 +66,7 @@ ddcplugin_keybind_volume_up(const char *keystring, void *plugin)
         return;
     }
 
-    ddcplugin_display_modify_volume(display, STEP_VOLUME);
+    ddcplugin_display_modify_volume(display, ddcplugin->settings.step_size_volume);
 }
 
 static void __attribute__((unused))
@@ -82,7 +78,7 @@ ddcplugin_keybind_volume_down(const char *keystring, void *plugin)
         return;
     }
 
-    ddcplugin_display_modify_volume(display, -STEP_VOLUME);
+    ddcplugin_display_modify_volume(display, -ddcplugin->settings.step_size_volume);
 }
 
 static void __attribute__((unused))
@@ -100,20 +96,16 @@ ddcplugin_keybind_mute_toggle(const char *keystring, void *plugin)
 static void
 ddcplugin_keybind_unregister_brightness(void)
 {
-#if ENABLE_KEYBIND_BRIGHTNESS
     keybinder_unbind("XF86MonBrightnessUp", ddcplugin_keybind_brightness_up);
     keybinder_unbind("XF86MonBrightnessDown", ddcplugin_keybind_brightness_down);
-#endif
 }
 
 static void
 ddcplugin_keybind_unregister_volume(void)
 {
-#if ENABLE_KEYBIND_VOLUME
     keybinder_unbind("XF86AudioRaiseVolume", ddcplugin_keybind_volume_up);
     keybinder_unbind("XF86AudioLowerVolume", ddcplugin_keybind_volume_down);
     keybinder_unbind("XF86AudioMute", ddcplugin_keybind_mute_toggle);
-#endif
 }
 
 static int
@@ -121,7 +113,6 @@ ddcplugin_keybind_register_brightness(DdcPlugin *ddcplugin)
 {
     int rc = 0;
 
-#if ENABLE_KEYBIND_BRIGHTNESS
     keybinder_init();
     if (!keybinder_bind("XF86MonBrightnessUp", ddcplugin_keybind_brightness_up, ddcplugin) ||
         !keybinder_bind("XF86MonBrightnessDown", ddcplugin_keybind_brightness_down, ddcplugin))
@@ -130,7 +121,6 @@ ddcplugin_keybind_register_brightness(DdcPlugin *ddcplugin)
         rc = -EBUSY;
         goto error;
     }
-#endif
 
 exit:
     return rc;
@@ -145,7 +135,6 @@ ddcplugin_keybind_register_volume(DdcPlugin *ddcplugin)
 {
     int rc = 0;
 
-#if ENABLE_KEYBIND_VOLUME
     keybinder_init();
     if (!keybinder_bind("XF86AudioRaiseVolume", ddcplugin_keybind_volume_up, ddcplugin) ||
         !keybinder_bind("XF86AudioLowerVolume", ddcplugin_keybind_volume_down, ddcplugin) ||
@@ -155,7 +144,6 @@ ddcplugin_keybind_register_volume(DdcPlugin *ddcplugin)
         rc = -EBUSY;
         goto error;
     }
-#endif
 
 exit:
     return rc;
@@ -185,6 +173,12 @@ ddcplugin_free(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
 }
 
 static void
+ddcplugin_save(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
+{
+    ddcplugin_settings_save(plugin, &ddcplugin->settings);
+}
+
+static void
 ddcplugin_new(XfcePanelPlugin *plugin)
 {
     int rc = 0;
@@ -206,20 +200,30 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     gtk_widget_show_all(GTK_WIDGET(plugin));
     xfce_panel_plugin_add_action_widget(plugin, ddcplugin->widget);
 
+    // Load settings
+    ddcplugin_settings_load(plugin, &ddcplugin->settings);
+    g_signal_connect(G_OBJECT(plugin), "save", G_CALLBACK(ddcplugin_save), ddcplugin);
+
     // Acquire display resources
     rc = ddcplugin_display_list_create(&ddcplugin->displays);
     if (rc < 0) {
         g_error("failed to get display list");
     }
 
-    // Register keybinds
-    rc = ddcplugin_keybind_register_brightness(ddcplugin);
-    if (rc < 0) {
-        g_error("failed to register brightness keybinds");
+    // Register brightness keybinds
+    if (ddcplugin->settings.enable_keybind_brightness) {
+        rc = ddcplugin_keybind_register_brightness(ddcplugin);
+        if (rc < 0) {
+            g_error("failed to register brightness keybinds");
+        }
     }
-    rc = ddcplugin_keybind_register_volume(ddcplugin);
-    if (rc < 0) {
-        g_error("failed to register volume keybinds");
+
+    // Register volume keybinds
+    if (ddcplugin->settings.enable_keybind_volume) {
+        rc = ddcplugin_keybind_register_volume(ddcplugin);
+        if (rc < 0) {
+            g_error("failed to register volume keybinds");
+        }
     }
 
     g_info("xfce4-ddc-plugin initialized");

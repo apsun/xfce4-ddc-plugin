@@ -44,15 +44,6 @@ application has registered the volume/brightness hotkeys. Try
 stopping/uninstalling `xfce4-pulseaudio-plugin` (volume) and
 `xfce4-power-manager` (brightness).
 
-You can also recompile the plugin with `ENABLE_KEYBIND_BRIGHTNESS` or
-`ENABLE_KEYBIND_VOLUME` set to `0` to disable the hotkeys.
-
-## TODO
-
-- Allow enabling/disabling/customizing hotkeys via GUI
-- Add a slider widget to change volume/brightness from the panel
-- Add support for multiple displays
-
 ## License
 
 GPLv3

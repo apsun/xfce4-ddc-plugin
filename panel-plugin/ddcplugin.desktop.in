@@ -2,7 +2,7 @@
 Type=X-XFCE-PanelPlugin
 Encoding=UTF-8
 _Name=DDC Plugin
-_Comment=Control monitor settings from the Xfce panel
+_Comment=Control monitor settings using hotkeys
 Icon=video-display
 X-XFCE-Module=ddcplugin
 X-XFCE-Internal=false

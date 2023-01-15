@@ -11,7 +11,9 @@ plugindir = \
 	$(libdir)/xfce4/panel/plugins
 
 libddcplugin_la_SOURCES = \
-	ddcplugin.c
+	ddcplugin.c \
+	ddcplugin_display.c \
+	ddcplugin_display.h
 
 libddcplugin_la_CFLAGS = \
 	$(LIBXFCE4UTIL_CFLAGS) \

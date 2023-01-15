@@ -318,6 +318,12 @@ ddcplugin_display_list_create(DdcDisplay **out_display_list)
         goto error;
     }
 
+    if (info_list->ct == 0) {
+        rc = -ENODEV;
+        g_warning("no displays detected");
+        goto error;
+    }
+
     for (int i = 0; i < info_list->ct; ++i) {
         info = &info_list->info[i];
         g_info("detected display %s (model: %s)", info->sn, info->model_name);

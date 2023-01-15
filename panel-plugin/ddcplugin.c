@@ -239,7 +239,6 @@ ddcplugin_free(DdcPlugin *ddcplugin)
 static void
 ddcplugin_new(XfcePanelPlugin *plugin)
 {
-    int rc = 0;
     DdcPlugin *ddcplugin;
 
     // Initialize locale
@@ -259,9 +258,12 @@ ddcplugin_new(XfcePanelPlugin *plugin)
         ddcplugin);
 
     // Acquire display resources
-    rc = ddcplugin_display_list_create(&ddcplugin->displays);
-    if (rc < 0) {
-        g_error("failed to get display list");
+    if (ddcplugin_display_list_create(&ddcplugin->displays) < 0) {
+         xfce_dialog_show_warning(
+            NULL,
+            _("Please ensure your monitor supports DDC, the i2c_dev kernel "
+              "module is loaded, and your user is in the i2c group."),
+            _("xfce4-ddc-plugin could not get display list"));
     }
 
     // Create panel icon

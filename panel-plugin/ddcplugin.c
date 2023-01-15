@@ -132,11 +132,12 @@ ddcplugin_keybind_register_brightness(DdcPlugin *ddcplugin)
     }
 #endif
 
-    return 0;
+exit:
+    return rc;
 
 error:
     ddcplugin_keybind_unregister_brightness();
-    return rc;
+    goto exit;
 }
 
 static int
@@ -156,11 +157,12 @@ ddcplugin_keybind_register_volume(DdcPlugin *ddcplugin)
     }
 #endif
 
-    return 0;
+exit:
+    return rc;
 
 error:
     ddcplugin_keybind_unregister_volume();
-    return rc;
+    goto exit;
 }
 
 static void

@@ -79,7 +79,7 @@ ddcplugin_display_read_values(DdcDisplay *display)
             "failed to read brightness of display %s: %s",
             display->info.sn,
             ddca_rc_desc(rc));
-        goto error;
+        goto exit;
     }
     g_info(
         "current brightness of display %s is %d/%d",
@@ -97,7 +97,7 @@ ddcplugin_display_read_values(DdcDisplay *display)
             "failed to read volume of display %s: %s",
             display->info.sn,
             ddca_rc_desc(rc));
-        goto error;
+        goto exit;
     }
     g_info(
         "current volume of display %s is %d/%d",
@@ -115,7 +115,7 @@ ddcplugin_display_read_values(DdcDisplay *display)
             "failed to read mute status of display %s: %s",
             display->info.sn,
             ddca_rc_desc(rc));
-        goto error;
+        goto exit;
     }
     g_info(
         "current mute status of display %s is %d/%d",
@@ -123,9 +123,7 @@ ddcplugin_display_read_values(DdcDisplay *display)
         display->desired_state.muted.current,
         display->desired_state.muted.max);
 
-    return 0;
-
-error:
+exit:
     return rc;
 }
 
@@ -148,7 +146,7 @@ ddcplugin_display_write_values(
                 "failed to write brightness of display %s: %s",
                 display->info.sn,
                 ddca_rc_desc(rc));
-            goto error;
+            goto exit;
         }
         g_info(
             "set brightness of display %s to %d/%d",
@@ -168,7 +166,7 @@ ddcplugin_display_write_values(
                 "failed to write volume of display %s: %s",
                 display->info.sn,
                 ddca_rc_desc(rc));
-            goto error;
+            goto exit;
         }
         g_info(
             "set volume of display %s to %d/%d",
@@ -188,7 +186,7 @@ ddcplugin_display_write_values(
                 "failed to write mute status of display %s: %s",
                 display->info.sn,
                 ddca_rc_desc(rc));
-            goto error;
+            goto exit;
         }
         g_info(
             "set mute status of display %s to %d/%d",
@@ -198,9 +196,8 @@ ddcplugin_display_write_values(
     }
 
     *current_state = *desired_state;
-    return 0;
 
-error:
+exit:
     return rc;
 }
 
@@ -311,6 +308,8 @@ ddcplugin_display_list_create(DdcDisplay **out_display_list)
     DDCA_Display_Info_List *info_list;
     DDCA_Display_Info *info;
 
+    *out_display_list = NULL;
+
     // Get list of available displays
     rc = ddca_get_display_info_list2(false, &info_list);
     if (rc < 0) {
@@ -369,10 +368,11 @@ ddcplugin_display_list_create(DdcDisplay **out_display_list)
         }
     }
 
-    return 0;
+exit:
+    return rc;
 
 error:
     ddcplugin_display_list_destroy(*out_display_list);
     *out_display_list = NULL;
-    return rc;
+    goto exit;
 }

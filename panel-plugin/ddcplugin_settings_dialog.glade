@@ -41,7 +41,7 @@
                 <property name="row-homogeneous">True</property>
                 <property name="column-homogeneous">True</property>
                 <child>
-                  <object class="GtkSwitch">
+                  <object class="GtkSwitch" id="switch-enable-hotkeys-brightness">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="halign">end</property>
@@ -131,7 +131,7 @@
                 <property name="row-homogeneous">True</property>
                 <property name="column-homogeneous">True</property>
                 <child>
-                  <object class="GtkSwitch">
+                  <object class="GtkSwitch" id="switch-enable-hotkeys-volume">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="halign">end</property>

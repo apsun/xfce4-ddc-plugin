@@ -1,3 +1,4 @@
+panel-plugin/ddcplugin.c
 panel-plugin/ddcplugin_settings_dialog.c
 panel-plugin/ddcplugin_settings_dialog.glade
 panel-plugin/ddcplugin.desktop.in

@@ -1,19 +1,19 @@
 #include "ddcplugin_settings_dialog.h"
 #include <config.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <glib.h>
+#include <glib-object.h>
 #include <gtk/gtk.h>
 #include <libxfce4ui/libxfce4ui.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include "ddcplugin.h"
+#include "ddcplugin_settings.h"
 #include "ddcplugin_settings_dialog_ui.h"
 
 static void
 ddcplugin_settings_dialog_response(DdcPlugin *ddcplugin, int response)
 {
     if (response == GTK_RESPONSE_CLOSE) {
-        ddcplugin_settings_save(ddcplugin->plugin, &ddcplugin->settings);
         ddcplugin_settings_dialog_destroy(ddcplugin);
         return;
     }
@@ -35,12 +35,9 @@ ddcplugin_settings_dialog_show(DdcPlugin *ddcplugin)
 {
     GtkWidget *dialog;
     GtkBuilder *builder;
-    GtkBox *content_area;
-    GtkWidget *content;
 
     // Ensure single dialog instance
-    dialog = ddcplugin->settings_dialog;
-    if (dialog != NULL) {
+    if (ddcplugin->settings_dialog != NULL) {
         g_info("dialog already exists");
         return;
     }
@@ -66,9 +63,10 @@ ddcplugin_settings_dialog_show(DdcPlugin *ddcplugin)
         NULL);
 
     // Add controls into dialog content area
-    content = GTK_WIDGET(gtk_builder_get_object(builder, "content"));
-    content_area = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog)));
-    gtk_box_pack_start(content_area, content, true, true, 0);
+    gtk_box_pack_start(
+        GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+        GTK_WIDGET(gtk_builder_get_object(builder, "content")),
+        TRUE, TRUE, 0);
 
     // Add handler for close response
     g_signal_connect_swapped(
@@ -76,6 +74,35 @@ ddcplugin_settings_dialog_show(DdcPlugin *ddcplugin)
         "response",
         G_CALLBACK(ddcplugin_settings_dialog_response),
         ddcplugin);
+
+    // Bind controls to settings object properties
+    g_object_bind_property(
+        ddcplugin->settings,
+        ENABLE_KEYBIND_BRIGHTNESS,
+        gtk_builder_get_object(builder, "switch-enable-hotkeys-brightness"),
+        "active",
+        G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+
+    g_object_bind_property(
+        ddcplugin->settings,
+        ENABLE_KEYBIND_VOLUME,
+        gtk_builder_get_object(builder, "switch-enable-hotkeys-volume"),
+        "active",
+        G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+
+    g_object_bind_property(
+        ddcplugin->settings,
+        STEP_SIZE_BRIGHTNESS,
+        gtk_builder_get_object(builder, "adjustment-step-size-brightness"),
+        "value",
+        G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
+
+    g_object_bind_property(
+        ddcplugin->settings,
+        STEP_SIZE_VOLUME,
+        gtk_builder_get_object(builder, "adjustment-step-size-volume"),
+        "value",
+        G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
 
     // Go!
     gtk_widget_show_all(dialog);

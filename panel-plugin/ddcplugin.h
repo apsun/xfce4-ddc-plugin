@@ -8,10 +8,10 @@
 
 typedef struct {
     XfcePanelPlugin *plugin;
-    DdcPluginSettings settings;
-    GtkWidget *widget;
-    GtkWidget *settings_dialog;
     DdcDisplay *displays;
+    GtkWidget *widget;
+    DdcPluginSettings *settings;
+    GtkWidget *settings_dialog;
 } DdcPlugin;
 
 #endif // DDCPLUGIN_H

@@ -1,18 +1,16 @@
 #ifndef DDCPLUGIN_SETTINGS_H
 #define DDCPLUGIN_SETTINGS_H
 
-#include <stdbool.h>
-#include <libxfce4panel/libxfce4panel.h>
+#include <glib.h>
+#include <glib-object.h>
 
-typedef struct {
-	bool enable_keybind_brightness;
-	bool enable_keybind_volume;
-	int step_size_brightness;
-	int step_size_volume;
-} DdcPluginSettings;
+#define ENABLE_KEYBIND_BRIGHTNESS "enable-keybind-brightness"
+#define ENABLE_KEYBIND_VOLUME "enable-keybind-volume"
+#define STEP_SIZE_BRIGHTNESS "step-size-brightness"
+#define STEP_SIZE_VOLUME "step-size-volume"
 
-void ddcplugin_settings_load(XfcePanelPlugin *plugin, DdcPluginSettings *settings);
+G_DECLARE_FINAL_TYPE(DdcPluginSettings, ddcplugin_settings, DDCPLUGIN, SETTINGS, GObject);
 
-void ddcplugin_settings_save(XfcePanelPlugin *plugin, const DdcPluginSettings *settings);
+DdcPluginSettings *ddcplugin_settings_new(const gchar *property_base);
 
 #endif // DDCPLUGIN_SETTINGS_H

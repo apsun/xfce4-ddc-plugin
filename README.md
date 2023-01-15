@@ -39,11 +39,6 @@ the plugin logs, run `xfce4-panel` with `G_MESSAGES_DEBUG` set:
 killall xfce4-panel; G_MESSAGES_DEBUG=xfce4-ddc-plugin xfce4-panel
 ```
 
-Note: if the plugin crashes on load, it's probably because another
-application has registered the volume/brightness hotkeys. Try
-stopping/uninstalling `xfce4-pulseaudio-plugin` (volume) and
-`xfce4-power-manager` (brightness).
-
 ## License
 
 GPLv3

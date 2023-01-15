@@ -1,7 +1,9 @@
 #include "ddcplugin_settings.h"
+#include <stdbool.h>
+#include <stdlib.h>
+#include <glib.h>
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
-#include <stdbool.h>
 
 void
 ddcplugin_settings_load(XfcePanelPlugin *plugin, DdcPluginSettings *settings)

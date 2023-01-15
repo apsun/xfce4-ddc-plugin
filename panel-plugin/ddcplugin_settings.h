@@ -11,8 +11,6 @@ typedef struct {
 	int step_size_volume;
 } DdcPluginSettings;
 
-void ddcplugin_settings_show_dialog(void);
-
 void ddcplugin_settings_load(XfcePanelPlugin *plugin, DdcPluginSettings *settings);
 
 void ddcplugin_settings_save(XfcePanelPlugin *plugin, const DdcPluginSettings *settings);

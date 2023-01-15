@@ -1,3 +1,4 @@
+#include "ddcplugin.h"
 #include <config.h>
 #include <stdlib.h>
 #include <glib.h>
@@ -7,13 +8,7 @@
 #include <keybinder.h>
 #include "ddcplugin_display.h"
 #include "ddcplugin_settings.h"
-
-typedef struct {
-    XfcePanelPlugin *plugin;
-    DdcPluginSettings settings;
-    GtkWidget *widget;
-    DdcDisplay *displays;
-} DdcPlugin;
+#include "ddcplugin_settings_dialog.h"
 
 static DdcDisplay *
 ddcplugin_pick_display(DdcPlugin *ddcplugin)
@@ -156,6 +151,9 @@ error:
 static void
 ddcplugin_free(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
 {
+    // Destroy the settings dialog if it's open
+    ddcplugin_settings_dialog_destroy(ddcplugin);
+
     // Unregister keybinds
     ddcplugin_keybind_unregister_brightness();
     ddcplugin_keybind_unregister_volume();
@@ -164,18 +162,14 @@ ddcplugin_free(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
     ddcplugin_display_list_destroy(ddcplugin->displays);
 
     // Destroy panel icon
-    gtk_widget_destroy(ddcplugin->widget);
+    if (ddcplugin->widget != NULL) {
+        gtk_widget_destroy(ddcplugin->widget);
+    }
 
     // Free the plugin object
     g_free(ddcplugin);
 
     g_info("xfce4-ddc-plugin finalized");
-}
-
-static void
-ddcplugin_save(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
-{
-    ddcplugin_settings_save(plugin, &ddcplugin->settings);
 }
 
 static void
@@ -191,6 +185,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     ddcplugin = g_malloc(sizeof(*ddcplugin));
     ddcplugin->plugin = plugin;
     ddcplugin->widget = NULL;
+    ddcplugin->settings_dialog = NULL;
     ddcplugin->displays = NULL;
     g_signal_connect(G_OBJECT(plugin), "free-data", G_CALLBACK(ddcplugin_free), ddcplugin);
 
@@ -202,7 +197,19 @@ ddcplugin_new(XfcePanelPlugin *plugin)
 
     // Load settings
     ddcplugin_settings_load(plugin, &ddcplugin->settings);
-    g_signal_connect(G_OBJECT(plugin), "save", G_CALLBACK(ddcplugin_save), ddcplugin);
+    g_signal_connect(
+        G_OBJECT(plugin),
+        "save",
+        G_CALLBACK(ddcplugin_settings_save),
+        &ddcplugin->settings);
+
+    // Hook up settings dialog
+    xfce_panel_plugin_menu_show_configure(plugin);
+    g_signal_connect(
+        G_OBJECT(plugin),
+        "configure-plugin",
+        G_CALLBACK(ddcplugin_settings_dialog_show),
+        ddcplugin);
 
     // Acquire display resources
     rc = ddcplugin_display_list_create(&ddcplugin->displays);

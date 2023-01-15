@@ -149,7 +149,7 @@ error:
 }
 
 static void
-ddcplugin_free(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
+ddcplugin_free(DdcPlugin *ddcplugin)
 {
     // Destroy the settings dialog if it's open
     ddcplugin_settings_dialog_destroy(ddcplugin);
@@ -187,7 +187,11 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     ddcplugin->widget = NULL;
     ddcplugin->settings_dialog = NULL;
     ddcplugin->displays = NULL;
-    g_signal_connect(G_OBJECT(plugin), "free-data", G_CALLBACK(ddcplugin_free), ddcplugin);
+    g_signal_connect_swapped(
+        G_OBJECT(plugin),
+        "free-data",
+        G_CALLBACK(ddcplugin_free),
+        ddcplugin);
 
     // Create panel icon
     ddcplugin->widget = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
@@ -205,7 +209,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
 
     // Hook up settings dialog
     xfce_panel_plugin_menu_show_configure(plugin);
-    g_signal_connect(
+    g_signal_connect_swapped(
         G_OBJECT(plugin),
         "configure-plugin",
         G_CALLBACK(ddcplugin_settings_dialog_show),

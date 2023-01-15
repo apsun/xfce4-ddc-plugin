@@ -7,7 +7,7 @@
 #include "ddcplugin.h"
 
 static void
-ddcplugin_settings_dialog_response(GtkWidget *widget, int response, DdcPlugin *ddcplugin)
+ddcplugin_settings_dialog_response(DdcPlugin *ddcplugin, int response)
 {
     if (response == GTK_RESPONSE_OK) {
         ddcplugin_settings_save(ddcplugin->plugin, &ddcplugin->settings);
@@ -28,7 +28,7 @@ ddcplugin_settings_dialog_destroy(DdcPlugin *ddcplugin)
 }
 
 void
-ddcplugin_settings_dialog_show(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
+ddcplugin_settings_dialog_show(DdcPlugin *ddcplugin)
 {
     if (ddcplugin->settings_dialog != NULL) {
         g_info("dialog already exists");
@@ -37,7 +37,7 @@ ddcplugin_settings_dialog_show(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
 
     ddcplugin->settings_dialog = xfce_titled_dialog_new_with_mixed_buttons(
         _("DDC Plugin"),
-        GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(plugin))),
+        GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(ddcplugin->plugin))),
         GTK_DIALOG_DESTROY_WITH_PARENT,
         "window-close", _("_Close"), GTK_RESPONSE_OK,
         NULL);
@@ -45,7 +45,7 @@ ddcplugin_settings_dialog_show(XfcePanelPlugin *plugin, DdcPlugin *ddcplugin)
     gtk_window_set_icon_name(GTK_WINDOW(ddcplugin->settings_dialog), "video-display");
     gtk_widget_show_all(ddcplugin->settings_dialog);
 
-    g_signal_connect(
+    g_signal_connect_swapped(
         G_OBJECT(ddcplugin->settings_dialog),
         "response",
         G_CALLBACK(ddcplugin_settings_dialog_response),

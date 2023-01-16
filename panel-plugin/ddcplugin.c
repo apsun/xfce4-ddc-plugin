@@ -9,9 +9,9 @@
 #include <libxfce4panel/libxfce4panel.h>
 #include <keybinder.h>
 #include "ddcdisplay.h"
+#include "ddcplugin_display.h"
 #include "ddcplugin_settings.h"
 #include "ddcplugin_settings_dialog.h"
-#include "ddcplugin_display.h"
 
 static DdcPluginDisplay *
 ddcplugin_pick_display(DdcPlugin *ddcplugin)
@@ -35,32 +35,32 @@ static void __attribute__((unused))
 ddcplugin_keybind_brightness_up(const char *keystring, void *plugin)
 {
     DdcPlugin *ddcplugin = plugin;
-    DdcPluginDisplay *state;
+    DdcPluginDisplay *display;
     gint step_size_brightness;
 
-    state = ddcplugin_pick_display(ddcplugin);
-    if (state == NULL) {
+    display = ddcplugin_pick_display(ddcplugin);
+    if (display == NULL) {
         return;
     }
 
     g_object_get(ddcplugin->settings, STEP_SIZE_BRIGHTNESS, &step_size_brightness, NULL);
-    ddcplugin_display_modify_brightness(state, step_size_brightness);
+    ddcplugin_display_modify_brightness(display, step_size_brightness);
 }
 
 static void __attribute__((unused))
 ddcplugin_keybind_brightness_down(const char *keystring, void *plugin)
 {
     DdcPlugin *ddcplugin = plugin;
-    DdcPluginDisplay *state;
+    DdcPluginDisplay *display;
     gint step_size_brightness;
 
-    state = ddcplugin_pick_display(ddcplugin);
-    if (state == NULL) {
+    display = ddcplugin_pick_display(ddcplugin);
+    if (display == NULL) {
         return;
     }
 
     g_object_get(ddcplugin->settings, STEP_SIZE_BRIGHTNESS, &step_size_brightness, NULL);
-    ddcplugin_display_modify_brightness(state, -step_size_brightness);
+    ddcplugin_display_modify_brightness(display, -step_size_brightness);
 }
 
 static void __attribute__((unused))

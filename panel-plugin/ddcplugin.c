@@ -8,20 +8,21 @@
 #include <libxfce4util/libxfce4util.h>
 #include <libxfce4panel/libxfce4panel.h>
 #include <keybinder.h>
-#include "ddcplugin_display.h"
+#include "ddcdisplay.h"
 #include "ddcplugin_settings.h"
 #include "ddcplugin_settings_dialog.h"
+#include "ddcplugin_display.h"
 
-static DdcDisplay *
+static DdcPluginDisplay *
 ddcplugin_pick_display(DdcPlugin *ddcplugin)
 {
-    DdcDisplay *display = ddcplugin->displays;
+    DdcPluginDisplay *display = ddcplugin->display_list;
     if (display == NULL) {
         g_warning("no displays detected");
         return NULL;
     }
 
-    if (display->next == NULL) {
+    if (ddcplugin_display_get_next(display) == NULL) {
         return display;
     }
 
@@ -34,39 +35,39 @@ static void __attribute__((unused))
 ddcplugin_keybind_brightness_up(const char *keystring, void *plugin)
 {
     DdcPlugin *ddcplugin = plugin;
-    DdcDisplay *display;
+    DdcPluginDisplay *state;
     gint step_size_brightness;
 
-    display = ddcplugin_pick_display(ddcplugin);
-    if (display == NULL) {
+    state = ddcplugin_pick_display(ddcplugin);
+    if (state == NULL) {
         return;
     }
 
     g_object_get(ddcplugin->settings, STEP_SIZE_BRIGHTNESS, &step_size_brightness, NULL);
-    ddcplugin_display_modify_brightness(display, step_size_brightness);
+    ddcplugin_display_modify_brightness(state, step_size_brightness);
 }
 
 static void __attribute__((unused))
 ddcplugin_keybind_brightness_down(const char *keystring, void *plugin)
 {
     DdcPlugin *ddcplugin = plugin;
-    DdcDisplay *display;
+    DdcPluginDisplay *state;
     gint step_size_brightness;
 
-    display = ddcplugin_pick_display(ddcplugin);
-    if (display == NULL) {
+    state = ddcplugin_pick_display(ddcplugin);
+    if (state == NULL) {
         return;
     }
 
     g_object_get(ddcplugin->settings, STEP_SIZE_BRIGHTNESS, &step_size_brightness, NULL);
-    ddcplugin_display_modify_brightness(display, -step_size_brightness);
+    ddcplugin_display_modify_brightness(state, -step_size_brightness);
 }
 
 static void __attribute__((unused))
 ddcplugin_keybind_volume_up(const char *keystring, void *plugin)
 {
     DdcPlugin *ddcplugin = plugin;
-    DdcDisplay *display;
+    DdcPluginDisplay *display;
     gint step_size_volume;
 
     display = ddcplugin_pick_display(ddcplugin);
@@ -82,7 +83,7 @@ static void __attribute__((unused))
 ddcplugin_keybind_volume_down(const char *keystring, void *plugin)
 {
     DdcPlugin *ddcplugin = plugin;
-    DdcDisplay *display;
+    DdcPluginDisplay *display;
     gint step_size_volume;
 
     display = ddcplugin_pick_display(ddcplugin);
@@ -98,14 +99,14 @@ static void __attribute__((unused))
 ddcplugin_keybind_mute_toggle(const char *keystring, void *plugin)
 {
     DdcPlugin *ddcplugin = plugin;
-    DdcDisplay *display;
+    DdcPluginDisplay *display;
 
     display = ddcplugin_pick_display(ddcplugin);
     if (display == NULL) {
         return;
     }
 
-    ddcplugin_display_toggle_mute(display);
+    ddcplugin_display_toggle_muted(display);
 }
 
 static void
@@ -227,8 +228,11 @@ ddcplugin_free(DdcPlugin *ddcplugin)
         g_object_unref(ddcplugin->settings);
     }
 
+    // Release display GObject wrappers
+    ddcplugin_display_list_destroy(ddcplugin->display_list);
+
     // Release display resources
-    ddcplugin_display_list_destroy(ddcplugin->displays);
+    ddcdisplay_list_destroy(ddcplugin->raw_display_list);
 
     // Free the plugin object
     g_free(ddcplugin);
@@ -247,8 +251,9 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     // Create the plugin object
     ddcplugin = g_malloc(sizeof(*ddcplugin));
     ddcplugin->plugin = plugin;
-    ddcplugin->displays = NULL;
+    ddcplugin->raw_display_list = NULL;
     ddcplugin->widget = NULL;
+    ddcplugin->display_list = NULL;
     ddcplugin->settings = NULL;
     ddcplugin->settings_dialog = NULL;
     g_signal_connect_swapped(
@@ -258,7 +263,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
         ddcplugin);
 
     // Acquire display resources
-    if (ddcplugin_display_list_create(&ddcplugin->displays) < 0) {
+    if (ddcdisplay_list_create(&ddcplugin->raw_display_list) < 0) {
          xfce_dialog_show_warning(
             NULL,
             _("Please ensure your monitor supports DDC, the i2c_dev kernel "
@@ -271,6 +276,9 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     gtk_container_add(GTK_CONTAINER(plugin), ddcplugin->widget);
     gtk_widget_show_all(GTK_WIDGET(plugin));
     xfce_panel_plugin_add_action_widget(plugin, ddcplugin->widget);
+
+    // Create GObject wrappers for display list
+    ddcplugin->display_list = ddcplugin_display_list_new(ddcplugin->raw_display_list);
 
     // Load settings and add listeners for changes
     ddcplugin->settings = ddcplugin_settings_new(

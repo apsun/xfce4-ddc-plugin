@@ -1,43 +1,24 @@
 #ifndef DDCPLUGIN_DISPLAY_H
 #define DDCPLUGIN_DISPLAY_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <pthread.h>
-#include <ddcutil_c_api.h>
+#include <glib.h>
+#include <glib-object.h>
+#include "ddcdisplay.h"
 
-typedef struct DdcValue {
-    uint16_t current;
-    uint16_t max;
-} DdcValue;
+#define MODEL "model"
+#define SERIAL "serial"
+#define BRIGHTNESS "brightness"
+#define VOLUME "volume"
+#define MUTED "muted"
 
-typedef struct DdcState {
-    DdcValue brightness;
-    DdcValue volume;
-    DdcValue muted;
-} DdcState;
+G_DECLARE_FINAL_TYPE(DdcPluginDisplay, ddcplugin_display, DDCPLUGIN, DISPLAY, GObject);
 
-typedef struct DdcDisplay {
-    struct DdcDisplay *next;
+DdcPluginDisplay *ddcplugin_display_list_new(DdcDisplay *raw_display_list);
+void ddcplugin_display_list_destroy(DdcPluginDisplay *display_list);
 
-    DDCA_Display_Info info;
-    DDCA_Display_Handle handle;
-
-    pthread_t update_thread;
-    pthread_cond_t update_cond;
-    pthread_mutex_t state_mutex;
-    DdcState desired_state;
-    bool exit;
-} DdcDisplay;
-
-void ddcplugin_display_modify_volume(DdcDisplay *display, int delta);
-
-void ddcplugin_display_modify_brightness(DdcDisplay *display, int delta);
-
-void ddcplugin_display_toggle_mute(DdcDisplay *display);
-
-void ddcplugin_display_list_destroy(DdcDisplay *display_list);
-
-int ddcplugin_display_list_create(DdcDisplay **out_display_list);
+DdcPluginDisplay *ddcplugin_display_get_next(DdcPluginDisplay *display);
+void ddcplugin_display_modify_brightness(DdcPluginDisplay *display, gint delta);
+void ddcplugin_display_modify_volume(DdcPluginDisplay *display, gint delta);
+void ddcplugin_display_toggle_muted(DdcPluginDisplay *display);
 
 #endif // DDCPLUGIN_DISPLAY_H

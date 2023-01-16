@@ -3,7 +3,6 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <libxfce4util/libxfce4util.h>
-#include <libxfce4panel/libxfce4panel.h>
 #include <xfconf/xfconf.h>
 
 #define DEFAULT_ENABLE_KEYBIND_BRIGHTNESS TRUE

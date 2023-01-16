@@ -15,6 +15,8 @@ libddcplugin_built_sources = \
 
 libddcplugin_la_SOURCES = \
 	ddcplugin.c \
+	ddcdisplay.c \
+	ddcdisplay.h \
 	ddcplugin_display.c \
 	ddcplugin_display.h \
 	ddcplugin_settings.c \

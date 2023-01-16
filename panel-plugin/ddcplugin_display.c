@@ -144,7 +144,7 @@ ddcplugin_display_init(DdcPluginDisplay *display)
 DdcPluginDisplay *
 ddcplugin_display_list_new(DdcDisplay *raw_display_list)
 {
-    DdcPluginDisplay *head;
+    DdcPluginDisplay *head = NULL;
     DdcPluginDisplay **phead = &head;
     DdcDisplay *raw_display = raw_display_list;
 

@@ -12,6 +12,7 @@
 #include "ddcplugin_display.h"
 #include "ddcplugin_settings.h"
 #include "ddcplugin_settings_dialog.h"
+#include "libxfce4panel/xfce-panel-plugin.h"
 
 static DdcPluginDisplay *
 ddcplugin_pick_display(DdcPlugin *ddcplugin)
@@ -208,6 +209,22 @@ ddcplugin_keybind_update_volume(DdcPlugin *ddcplugin)
     }
 }
 
+static GtkWidget *
+ddcplugin_create_and_show_widget(XfcePanelPlugin *plugin)
+{
+    GtkWidget *button;
+    GtkWidget *icon;
+
+    button = xfce_panel_create_toggle_button();
+    gtk_container_add(GTK_CONTAINER(plugin), button);
+
+    icon = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
+    gtk_container_add(GTK_CONTAINER(button), icon);
+
+    gtk_widget_show_all(GTK_WIDGET(plugin));
+    return button;
+}
+
 static void
 ddcplugin_free(DdcPlugin *ddcplugin)
 {
@@ -218,7 +235,7 @@ ddcplugin_free(DdcPlugin *ddcplugin)
     ddcplugin_keybind_unregister_brightness();
     ddcplugin_keybind_unregister_volume();
 
-    // Destroy panel icon
+    // Destroy panel button
     if (ddcplugin->widget != NULL) {
         gtk_widget_destroy(ddcplugin->widget);
     }
@@ -272,9 +289,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     }
 
     // Create panel icon
-    ddcplugin->widget = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
-    gtk_container_add(GTK_CONTAINER(plugin), ddcplugin->widget);
-    gtk_widget_show_all(GTK_WIDGET(plugin));
+    ddcplugin->widget = ddcplugin_create_and_show_widget(plugin);
     xfce_panel_plugin_add_action_widget(plugin, ddcplugin->widget);
 
     // Create GObject wrappers for display list

@@ -21,6 +21,8 @@ struct _DdcPluginSettings {
     gboolean enable_keybind_volume;
     gint step_size_brightness;
     gint step_size_volume;
+
+    XfconfChannel *channel;
 };
 
 G_DEFINE_TYPE(DdcPluginSettings, ddcplugin_settings, G_TYPE_OBJECT);
@@ -93,7 +95,7 @@ ddcplugin_settings_get_property(
     }
 }
 
-static void
+static gulong
 ddcplugin_settings_property_bind(
     const gchar *property_base,
     XfconfChannel *channel,
@@ -101,9 +103,30 @@ ddcplugin_settings_property_bind(
     GType property_type,
     DdcPluginSettings *settings)
 {
-    gchar *xfconf_property = g_strconcat(property_base, "/", property_name, NULL);
-    xfconf_g_property_bind(channel, xfconf_property, property_type, settings, property_name);
+    gchar *xfconf_property;
+    gulong handler;
+
+    xfconf_property = g_strconcat(property_base, "/", property_name, NULL);
+
+    handler = xfconf_g_property_bind(
+        channel, xfconf_property, property_type, settings, property_name);
+
     g_free(xfconf_property);
+
+    return handler;
+}
+
+static void
+ddcplugin_settings_dispose(GObject *object)
+{
+    DdcPluginSettings *settings = DDCPLUGIN_SETTINGS(object);
+
+    if (settings->channel != NULL) {
+        xfconf_g_property_unbind_all(settings->channel);
+        settings->channel = NULL;
+    }
+
+    G_OBJECT_CLASS(ddcplugin_settings_parent_class)->dispose(object);
 }
 
 static void
@@ -113,15 +136,14 @@ ddcplugin_settings_init(DdcPluginSettings *settings)
     settings->enable_keybind_volume = DEFAULT_ENABLE_KEYBIND_VOLUME;
     settings->step_size_brightness = DEFAULT_STEP_SIZE_BRIGHTNESS;
     settings->step_size_volume = DEFAULT_STEP_SIZE_VOLUME;
+    settings->channel = NULL;
 }
 
 DdcPluginSettings *
 ddcplugin_settings_new(const gchar *property_base)
 {
     DdcPluginSettings *settings;
-    XfconfChannel *channel;
 
-    // Create settings object
     settings = g_object_new(ddcplugin_settings_get_type(), NULL);
 
     if (!xfconf_init(NULL)) {
@@ -129,29 +151,32 @@ ddcplugin_settings_new(const gchar *property_base)
         goto exit;
     }
 
-    // Bind settings object properties to xfconf channel
-    channel = xfconf_channel_get("xfce4-ddc-plugin");
+    settings->channel = xfconf_channel_get("xfce4-ddc-plugin");
+
     ddcplugin_settings_property_bind(
         property_base,
-        channel,
+        settings->channel,
         ENABLE_KEYBIND_BRIGHTNESS,
         G_TYPE_BOOLEAN,
         settings);
+
     ddcplugin_settings_property_bind(
         property_base,
-        channel,
+        settings->channel,
         ENABLE_KEYBIND_VOLUME,
         G_TYPE_BOOLEAN,
         settings);
+
     ddcplugin_settings_property_bind(
         property_base,
-        channel,
+        settings->channel,
         STEP_SIZE_BRIGHTNESS,
         G_TYPE_INT,
         settings);
+
     ddcplugin_settings_property_bind(
         property_base,
-        channel,
+        settings->channel,
         STEP_SIZE_VOLUME,
         G_TYPE_INT,
         settings);
@@ -164,6 +189,7 @@ static void
 ddcplugin_settings_class_init(DdcPluginSettingsClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
+    object_class->dispose = ddcplugin_settings_dispose;
     object_class->set_property = ddcplugin_settings_set_property;
     object_class->get_property = ddcplugin_settings_get_property;
 

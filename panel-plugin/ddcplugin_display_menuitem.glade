@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.40.0 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <object class="GtkAdjustment" id="adjustment-brightness">
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment-volume">
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkImage" id="image-volume">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">audio-volume-high-symbolic</property>
+  </object>
+  <object class="GtkBox" id="content">
+    <property name="can-focus">False</property>
+    <property name="orientation">vertical</property>
+    <property name="spacing">2</property>
+    <child>
+      <object class="GtkFrame">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label-xalign">0</property>
+        <property name="shadow-type">none</property>
+        <child>
+          <object class="GtkAlignment">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="left-padding">4</property>
+            <property name="right-padding">4</property>
+            <child>
+              <!-- n-columns=2 n-rows=2 -->
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="column-spacing">4</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="icon-name">display-brightness-symbolic</property>
+                    <property name="icon_size">3</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScale">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="adjustment">adjustment-brightness</property>
+                    <property name="draw-value">False</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="button-volume">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="image">image-volume</property>
+                    <property name="relief">none</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScale">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="adjustment">adjustment-volume</property>
+                    <property name="draw-value">False</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child type="label">
+          <object class="GtkLabel" id="label-display-name">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="xpad">4</property>
+            <property name="ypad">4</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
+</interface>

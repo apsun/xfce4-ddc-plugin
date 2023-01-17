@@ -1,4 +1,5 @@
 panel-plugin/ddcplugin.c
 panel-plugin/ddcplugin_keybind.c
 panel-plugin/ddcplugin_settings_dialog.glade
+panel-plugin/ddcplugin_display_menuitem.glade
 panel-plugin/ddcplugin.desktop.in

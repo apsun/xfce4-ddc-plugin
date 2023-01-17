@@ -11,7 +11,8 @@ plugindir = \
 	$(libdir)/xfce4/panel/plugins
 
 libddcplugin_built_sources = \
-	ddcplugin_settings_dialog_ui.h
+	ddcplugin_settings_dialog_ui.h \
+	ddcplugin_display_menuitem_ui.h
 
 libddcplugin_la_SOURCES = \
 	ddcplugin.c \
@@ -60,7 +61,8 @@ desktop_DATA = \
 
 EXTRA_DIST = \
 	ddcplugin.desktop.in \
-	ddcplugin_settings_dialog.glade
+	ddcplugin_settings_dialog.glade \
+	ddcplugin_display_menuitem.glade
 
 DISTCLEANFILES = \
 	$(desktop_DATA)
@@ -75,5 +77,8 @@ DISTCLEANFILES += \
 
 ddcplugin_settings_dialog_ui.h: ddcplugin_settings_dialog.glade
 	$(AM_V_GEN) xdt-csource --static --strip-comments --strip-content --name=ddcplugin_settings_dialog_ui $< >$@
+
+ddcplugin_display_menuitem_ui.h: ddcplugin_display_menuitem.glade
+	$(AM_V_GEN) xdt-csource --static --strip-comments --strip-content --name=ddcplugin_display_menuitem_ui $< >$@
 
 endif

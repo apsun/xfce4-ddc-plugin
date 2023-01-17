@@ -21,6 +21,8 @@ libddcplugin_la_SOURCES = \
 	ddcplugin_display.h \
 	ddcplugin_settings.c \
 	ddcplugin_settings.h \
+	ddcplugin_keybind.c \
+	ddcplugin_keybind.h \
 	ddcplugin_settings_dialog.c \
 	ddcplugin_settings_dialog.h
 

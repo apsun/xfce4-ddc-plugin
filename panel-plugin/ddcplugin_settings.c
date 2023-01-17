@@ -94,60 +94,6 @@ ddcplugin_settings_get_property(
 }
 
 static void
-ddcplugin_settings_class_init(DdcPluginSettingsClass *klass)
-{
-    GObjectClass *object_class = G_OBJECT_CLASS(klass);
-    object_class->set_property = ddcplugin_settings_set_property;
-    object_class->get_property = ddcplugin_settings_get_property;
-
-    ddcplugin_settings_properties[PROP_ENABLE_KEYBIND_BRIGHTNESS] = g_param_spec_boolean(
-        ENABLE_KEYBIND_BRIGHTNESS,
-        NULL,
-        NULL,
-        DEFAULT_ENABLE_KEYBIND_BRIGHTNESS,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-    ddcplugin_settings_properties[PROP_ENABLE_KEYBIND_VOLUME] = g_param_spec_boolean(
-        ENABLE_KEYBIND_VOLUME,
-        NULL,
-        NULL,
-        DEFAULT_ENABLE_KEYBIND_BRIGHTNESS,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-    ddcplugin_settings_properties[PROP_STEP_SIZE_BRIGHTNESS] = g_param_spec_int(
-        STEP_SIZE_BRIGHTNESS,
-        NULL,
-        NULL,
-        1,
-        100,
-        DEFAULT_STEP_SIZE_BRIGHTNESS,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-    ddcplugin_settings_properties[PROP_STEP_SIZE_VOLUME] = g_param_spec_int(
-        STEP_SIZE_VOLUME,
-        NULL,
-        NULL,
-        1,
-        100,
-        DEFAULT_STEP_SIZE_VOLUME,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-
-    g_object_class_install_properties(
-        object_class,
-        N_PROPERTIES,
-        ddcplugin_settings_properties);
-}
-
-static void
-ddcplugin_settings_init(DdcPluginSettings *settings)
-{
-    settings->enable_keybind_brightness = DEFAULT_ENABLE_KEYBIND_BRIGHTNESS;
-    settings->enable_keybind_volume = DEFAULT_ENABLE_KEYBIND_VOLUME;
-    settings->step_size_brightness = DEFAULT_STEP_SIZE_BRIGHTNESS;
-    settings->step_size_volume = DEFAULT_STEP_SIZE_VOLUME;
-}
-
-static void
 ddcplugin_settings_property_bind(
     const gchar *property_base,
     XfconfChannel *channel,
@@ -158,6 +104,15 @@ ddcplugin_settings_property_bind(
     gchar *xfconf_property = g_strconcat(property_base, "/", property_name, NULL);
     xfconf_g_property_bind(channel, xfconf_property, property_type, settings, property_name);
     g_free(xfconf_property);
+}
+
+static void
+ddcplugin_settings_init(DdcPluginSettings *settings)
+{
+    settings->enable_keybind_brightness = DEFAULT_ENABLE_KEYBIND_BRIGHTNESS;
+    settings->enable_keybind_volume = DEFAULT_ENABLE_KEYBIND_VOLUME;
+    settings->step_size_brightness = DEFAULT_STEP_SIZE_BRIGHTNESS;
+    settings->step_size_volume = DEFAULT_STEP_SIZE_VOLUME;
 }
 
 DdcPluginSettings *
@@ -203,4 +158,49 @@ ddcplugin_settings_new(const gchar *property_base)
 
 exit:
     return settings;
+}
+
+static void
+ddcplugin_settings_class_init(DdcPluginSettingsClass *klass)
+{
+    GObjectClass *object_class = G_OBJECT_CLASS(klass);
+    object_class->set_property = ddcplugin_settings_set_property;
+    object_class->get_property = ddcplugin_settings_get_property;
+
+    ddcplugin_settings_properties[PROP_ENABLE_KEYBIND_BRIGHTNESS] = g_param_spec_boolean(
+        ENABLE_KEYBIND_BRIGHTNESS,
+        NULL,
+        NULL,
+        DEFAULT_ENABLE_KEYBIND_BRIGHTNESS,
+        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    ddcplugin_settings_properties[PROP_ENABLE_KEYBIND_VOLUME] = g_param_spec_boolean(
+        ENABLE_KEYBIND_VOLUME,
+        NULL,
+        NULL,
+        DEFAULT_ENABLE_KEYBIND_BRIGHTNESS,
+        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    ddcplugin_settings_properties[PROP_STEP_SIZE_BRIGHTNESS] = g_param_spec_int(
+        STEP_SIZE_BRIGHTNESS,
+        NULL,
+        NULL,
+        1,
+        100,
+        DEFAULT_STEP_SIZE_BRIGHTNESS,
+        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    ddcplugin_settings_properties[PROP_STEP_SIZE_VOLUME] = g_param_spec_int(
+        STEP_SIZE_VOLUME,
+        NULL,
+        NULL,
+        1,
+        100,
+        DEFAULT_STEP_SIZE_VOLUME,
+        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+    g_object_class_install_properties(
+        object_class,
+        N_PROPERTIES,
+        ddcplugin_settings_properties);
 }

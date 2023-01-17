@@ -20,35 +20,6 @@ struct _DdcPluginSettingsDialog {
 
 G_DEFINE_TYPE(DdcPluginSettingsDialog, ddcplugin_settings_dialog, G_TYPE_OBJECT);
 
-static void
-ddcplugin_settings_dialog_dispose(GObject *object)
-{
-    DdcPluginSettingsDialog *dialog = DDCPLUGIN_SETTINGS_DIALOG(object);
-
-    ddcplugin_settings_dialog_hide(dialog);
-
-    if (dialog->settings != NULL) {
-        g_object_unref(dialog->settings);
-        dialog->settings = NULL;
-    }
-
-    G_OBJECT_CLASS(ddcplugin_settings_dialog_parent_class)->dispose(object);
-}
-
-static void
-ddcplugin_settings_dialog_class_init(DdcPluginSettingsDialogClass *klass)
-{
-    GObjectClass *object_class = G_OBJECT_CLASS(klass);
-    object_class->dispose = ddcplugin_settings_dialog_dispose;
-}
-
-static void
-ddcplugin_settings_dialog_init(DdcPluginSettingsDialog *dialog)
-{
-    dialog->settings = NULL;
-    dialog->dialog = NULL;
-}
-
 void
 ddcplugin_settings_dialog_hide(DdcPluginSettingsDialog *dialog)
 {
@@ -121,6 +92,28 @@ ddcplugin_settings_dialog_show(DdcPluginSettingsDialog *dialog)
     gtk_widget_show_all(dialog->dialog);
 }
 
+static void
+ddcplugin_settings_dialog_dispose(GObject *object)
+{
+    DdcPluginSettingsDialog *dialog = DDCPLUGIN_SETTINGS_DIALOG(object);
+
+    ddcplugin_settings_dialog_hide(dialog);
+
+    if (dialog->settings != NULL) {
+        g_object_unref(dialog->settings);
+        dialog->settings = NULL;
+    }
+
+    G_OBJECT_CLASS(ddcplugin_settings_dialog_parent_class)->dispose(object);
+}
+
+static void
+ddcplugin_settings_dialog_init(DdcPluginSettingsDialog *dialog)
+{
+    dialog->settings = NULL;
+    dialog->dialog = NULL;
+}
+
 DdcPluginSettingsDialog *
 ddcplugin_settings_dialog_new(DdcPluginSettings *settings)
 {
@@ -129,4 +122,11 @@ ddcplugin_settings_dialog_new(DdcPluginSettings *settings)
     dialog = g_object_new(ddcplugin_settings_dialog_get_type(), NULL);
     dialog->settings = g_object_ref(settings);
     return dialog;
+}
+
+static void
+ddcplugin_settings_dialog_class_init(DdcPluginSettingsDialogClass *klass)
+{
+    GObjectClass *object_class = G_OBJECT_CLASS(klass);
+    object_class->dispose = ddcplugin_settings_dialog_dispose;
 }

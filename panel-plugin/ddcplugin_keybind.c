@@ -219,6 +219,37 @@ ddcplugin_keybind_update_volume(DdcPluginKeybind *keybind)
 }
 
 static void
+ddcplugin_keybind_dispose(GObject *object)
+{
+    DdcPluginKeybind *keybind = DDCPLUGIN_KEYBIND(object);
+
+    ddcplugin_keybind_unregister_volume();
+    ddcplugin_keybind_unregister_brightness();
+
+    if (keybind->signal_handler_volume > 0) {
+        g_signal_handler_disconnect(keybind->settings, keybind->signal_handler_volume);
+        keybind->signal_handler_volume = 0;
+    }
+
+    if (keybind->signal_handler_brightness > 0) {
+        g_signal_handler_disconnect(keybind->settings, keybind->signal_handler_brightness);
+        keybind->signal_handler_brightness = 0;
+    }
+
+    if (keybind->settings != NULL) {
+        g_object_unref(keybind->settings);
+        keybind->settings = NULL;
+    }
+
+    if (keybind->display_list != NULL) {
+        g_object_unref(keybind->display_list);
+        keybind->display_list = NULL;
+    }
+
+    G_OBJECT_CLASS(ddcplugin_keybind_parent_class)->dispose(object);
+}
+
+static void
 ddcplugin_keybind_init(DdcPluginKeybind *keybind)
 {
     keybind->display_list = NULL;
@@ -254,37 +285,6 @@ ddcplugin_keybind_new(
     ddcplugin_keybind_update_volume(keybind);
 
     return keybind;
-}
-
-static void
-ddcplugin_keybind_dispose(GObject *object)
-{
-    DdcPluginKeybind *keybind = DDCPLUGIN_KEYBIND(object);
-
-    ddcplugin_keybind_unregister_volume();
-    ddcplugin_keybind_unregister_brightness();
-
-    if (keybind->signal_handler_volume > 0) {
-        g_signal_handler_disconnect(keybind->settings, keybind->signal_handler_volume);
-        keybind->signal_handler_volume = 0;
-    }
-
-    if (keybind->signal_handler_brightness > 0) {
-        g_signal_handler_disconnect(keybind->settings, keybind->signal_handler_brightness);
-        keybind->signal_handler_brightness = 0;
-    }
-
-    if (keybind->settings != NULL) {
-        g_object_unref(keybind->settings);
-        keybind->settings = NULL;
-    }
-
-    if (keybind->display_list != NULL) {
-        g_object_unref(keybind->display_list);
-        keybind->display_list = NULL;
-    }
-
-    G_OBJECT_CLASS(ddcplugin_keybind_parent_class)->dispose(object);
 }
 
 static void

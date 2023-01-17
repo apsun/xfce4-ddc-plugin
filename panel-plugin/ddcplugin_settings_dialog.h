@@ -12,9 +12,9 @@ G_DECLARE_FINAL_TYPE(
     SETTINGS_DIALOG,
     GObject);
 
-DdcPluginSettingsDialog *ddcplugin_settings_dialog_new(DdcPluginSettings *settings);
-
 void ddcplugin_settings_dialog_hide(DdcPluginSettingsDialog *dialog);
 void ddcplugin_settings_dialog_show(DdcPluginSettingsDialog *dialog);
+
+DdcPluginSettingsDialog *ddcplugin_settings_dialog_new(DdcPluginSettings *settings);
 
 #endif // DDCPLUGIN_SETTINGS_DIALOG_H

@@ -255,8 +255,11 @@ ddcplugin_free(DdcPlugin *ddcplugin)
         g_object_unref(ddcplugin->settings);
     }
 
-    // Release display GObject wrappers
-    ddcplugin_display_list_destroy(ddcplugin->display_list);
+    // Release display GObject wrappers (each node owns its next
+    // pointer, so we only need to unref the head)
+    if (ddcplugin->display_list != NULL) {
+        g_object_unref(ddcplugin->display_list);
+    }
 
     // Release display resources
     ddcdisplay_list_destroy(ddcplugin->raw_display_list);
@@ -299,7 +302,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     }
 
     // Create GObject wrappers for display list
-    ddcplugin->display_list = ddcplugin_display_list_new(ddcplugin->raw_display_list);
+    ddcplugin->display_list = ddcplugin_display_new(ddcplugin->raw_display_list);
 
     // Load settings and add listeners for changes
     ddcplugin->settings = ddcplugin_settings_new(

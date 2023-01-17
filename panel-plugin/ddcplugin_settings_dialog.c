@@ -27,8 +27,10 @@ ddcplugin_settings_dialog_dispose(GObject *object)
 
     ddcplugin_settings_dialog_hide(dialog);
 
-    g_object_unref(dialog->settings);
-    dialog->settings = NULL;
+    if (dialog->settings != NULL) {
+        g_object_unref(dialog->settings);
+        dialog->settings = NULL;
+    }
 
     G_OBJECT_CLASS(ddcplugin_settings_dialog_parent_class)->dispose(object);
 }

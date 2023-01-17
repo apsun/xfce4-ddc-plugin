@@ -29,6 +29,19 @@ enum {
 static GParamSpec *ddcplugin_display_properties[N_PROPERTIES] = { NULL, };
 
 static void
+ddcplugin_display_dispose(GObject *object)
+{
+    DdcPluginDisplay *display = DDCPLUGIN_DISPLAY(object);
+
+    if (display->next != NULL) {
+        g_object_unref(display->next);
+        display->next = NULL;
+    }
+
+    G_OBJECT_CLASS(ddcplugin_display_parent_class)->dispose(object);
+}
+
+static void
 ddcplugin_display_set_property(
     GObject *object,
     guint prop_id,
@@ -86,6 +99,7 @@ static void
 ddcplugin_display_class_init(DdcPluginDisplayClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS(klass);
+    object_class->dispose = ddcplugin_display_dispose;
     object_class->set_property = ddcplugin_display_set_property;
     object_class->get_property = ddcplugin_display_get_property;
 
@@ -142,7 +156,7 @@ ddcplugin_display_init(DdcPluginDisplay *display)
 }
 
 DdcPluginDisplay *
-ddcplugin_display_list_new(DdcDisplay *raw_display_list)
+ddcplugin_display_new(DdcDisplay *raw_display_list)
 {
     DdcPluginDisplay *head = NULL;
     DdcPluginDisplay **phead = &head;
@@ -156,18 +170,6 @@ ddcplugin_display_list_new(DdcDisplay *raw_display_list)
     }
 
     return head;
-}
-
-void
-ddcplugin_display_list_destroy(DdcPluginDisplay *display_list)
-{
-    DdcPluginDisplay *display;
-
-    while (display_list != NULL) {
-        display = display_list;
-        display_list = display_list->next;
-        g_object_unref(display);
-    }
 }
 
 DdcPluginDisplay *

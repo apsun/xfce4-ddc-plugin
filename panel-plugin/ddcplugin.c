@@ -1,4 +1,3 @@
-#include "ddcplugin.h"
 #include <config.h>
 #include <stdlib.h>
 #include <glib.h>
@@ -13,6 +12,15 @@
 #include "ddcplugin_settings.h"
 #include "ddcplugin_settings_dialog.h"
 #include "libxfce4panel/xfce-panel-plugin.h"
+
+typedef struct {
+    XfcePanelPlugin *plugin;
+    DdcDisplay *raw_display_list;
+    DdcPluginDisplay *display_list;
+    DdcPluginSettings *settings;
+    GtkWidget *widget;
+    DdcPluginSettingsDialog *settings_dialog;
+} DdcPlugin;
 
 static DdcPluginDisplay *
 ddcplugin_pick_display(DdcPlugin *ddcplugin)
@@ -228,17 +236,19 @@ ddcplugin_create_and_show_widget(XfcePanelPlugin *plugin)
 static void
 ddcplugin_free(DdcPlugin *ddcplugin)
 {
-    // Destroy the settings dialog if it's open
-    ddcplugin_settings_dialog_destroy(ddcplugin);
-
-    // Unregister keybinds
-    ddcplugin_keybind_unregister_brightness();
-    ddcplugin_keybind_unregister_volume();
+    // Destroy settings dialog
+    if (ddcplugin->settings_dialog != NULL) {
+        g_object_unref(ddcplugin->settings_dialog);
+    }
 
     // Destroy panel button
     if (ddcplugin->widget != NULL) {
         gtk_widget_destroy(ddcplugin->widget);
     }
+
+    // Unregister keybinds
+    ddcplugin_keybind_unregister_brightness();
+    ddcplugin_keybind_unregister_volume();
 
     // Destroy settings (this will remove notify:: listeners)
     if (ddcplugin->settings != NULL) {
@@ -288,10 +298,6 @@ ddcplugin_new(XfcePanelPlugin *plugin)
             _("xfce4-ddc-plugin could not get display list"));
     }
 
-    // Create panel icon
-    ddcplugin->widget = ddcplugin_create_and_show_widget(plugin);
-    xfce_panel_plugin_add_action_widget(plugin, ddcplugin->widget);
-
     // Create GObject wrappers for display list
     ddcplugin->display_list = ddcplugin_display_list_new(ddcplugin->raw_display_list);
 
@@ -313,13 +319,18 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     ddcplugin_keybind_update_brightness(ddcplugin);
     ddcplugin_keybind_update_volume(ddcplugin);
 
+    // Create panel button
+    ddcplugin->widget = ddcplugin_create_and_show_widget(plugin);
+    xfce_panel_plugin_add_action_widget(plugin, ddcplugin->widget);
+
     // Enable settings dialog menu item
+    ddcplugin->settings_dialog = ddcplugin_settings_dialog_new(ddcplugin->settings);
     xfce_panel_plugin_menu_show_configure(plugin);
     g_signal_connect_swapped(
         G_OBJECT(plugin),
         "configure-plugin",
         G_CALLBACK(ddcplugin_settings_dialog_show),
-        ddcplugin);
+        ddcplugin->settings_dialog);
 
     g_info("xfce4-ddc-plugin initialized");
 }

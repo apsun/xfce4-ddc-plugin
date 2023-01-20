@@ -4,10 +4,6 @@
 #include <glib-object.h>
 #include "ddcdisplay.h"
 
-struct _DdcPluginDisplayClass {
-    GObjectClass __parent__;
-};
-
 struct _DdcPluginDisplay {
     GObject __parent__;
 
@@ -154,7 +150,7 @@ ddcplugin_display_new(DdcDisplay *raw_display_list)
     DdcDisplay *raw_display = raw_display_list;
 
     while (raw_display != NULL) {
-        *phead = g_object_new(ddcplugin_display_get_type(), NULL);
+        *phead = g_object_new(DDCPLUGIN_TYPE_DISPLAY, NULL);
         (*phead)->display = raw_display;
         phead = &(*phead)->next;
         raw_display = raw_display->next;

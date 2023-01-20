@@ -7,6 +7,7 @@
 #include "ddcplugin_settings.h"
 
 G_DECLARE_FINAL_TYPE(DdcPluginKeybind, ddcplugin_keybind, DDCPLUGIN, KEYBIND, GObject);
+#define DDCPLUGIN_TYPE_KEYBIND ddcplugin_keybind_get_type()
 
 DdcPluginKeybind *ddcplugin_keybind_new(
     DdcPluginDisplay *display_list,

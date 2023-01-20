@@ -7,10 +7,6 @@
 #include "ddcplugin_display.h"
 #include "ddcplugin_settings.h"
 
-struct _DdcPluginKeybindClass {
-    GObjectClass __parent__;
-};
-
 struct _DdcPluginKeybind {
     GObject __parent__;
 
@@ -265,7 +261,7 @@ ddcplugin_keybind_new(
 {
     DdcPluginKeybind *keybind;
 
-    keybind = g_object_new(ddcplugin_keybind_get_type(), NULL);
+    keybind = g_object_new(DDCPLUGIN_TYPE_KEYBIND, NULL);
     keybind->display_list = g_object_ref(display_list);
     keybind->settings = g_object_ref(settings);
 

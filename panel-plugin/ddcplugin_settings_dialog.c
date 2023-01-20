@@ -7,10 +7,6 @@
 #include "ddcplugin_settings.h"
 #include "ddcplugin_settings_dialog_ui.h"
 
-struct _DdcPluginSettingsDialogClass {
-    GObject __parent__;
-};
-
 struct _DdcPluginSettingsDialog {
     GObject __parent__;
 
@@ -119,7 +115,7 @@ ddcplugin_settings_dialog_new(DdcPluginSettings *settings)
 {
     DdcPluginSettingsDialog *dialog;
 
-    dialog = g_object_new(ddcplugin_settings_dialog_get_type(), NULL);
+    dialog = g_object_new(DDCPLUGIN_TYPE_SETTINGS_DIALOG, NULL);
     dialog->settings = g_object_ref(settings);
     return dialog;
 }

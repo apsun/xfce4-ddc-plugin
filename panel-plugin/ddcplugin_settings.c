@@ -10,10 +10,6 @@
 #define DEFAULT_STEP_SIZE_BRIGHTNESS 5
 #define DEFAULT_STEP_SIZE_VOLUME 5
 
-struct _DdcPluginSettingsClass {
-    GObjectClass __parent__;
-};
-
 struct _DdcPluginSettings {
     GObject __parent__;
 
@@ -144,7 +140,7 @@ ddcplugin_settings_new(const gchar *property_base)
 {
     DdcPluginSettings *settings;
 
-    settings = g_object_new(ddcplugin_settings_get_type(), NULL);
+    settings = g_object_new(DDCPLUGIN_TYPE_SETTINGS, NULL);
 
     if (!xfconf_init(NULL)) {
         g_warning("could not initialize xfconf, using default settings");

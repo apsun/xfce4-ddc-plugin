@@ -12,6 +12,7 @@
 #define MUTED "muted"
 
 G_DECLARE_FINAL_TYPE(DdcPluginDisplay, ddcplugin_display, DDCPLUGIN, DISPLAY, GObject);
+#define DDCPLUGIN_TYPE_DISPLAY ddcplugin_display_get_type()
 
 void ddcplugin_display_modify_brightness(DdcPluginDisplay *display, gint delta);
 void ddcplugin_display_modify_volume(DdcPluginDisplay *display, gint delta);

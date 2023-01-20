@@ -11,6 +11,7 @@ G_DECLARE_FINAL_TYPE(
     DDCPLUGIN,
     SETTINGS_DIALOG,
     GObject);
+#define DDCPLUGIN_TYPE_SETTINGS_DIALOG ddcplugin_settings_dialog_get_type()
 
 void ddcplugin_settings_dialog_hide(DdcPluginSettingsDialog *dialog);
 void ddcplugin_settings_dialog_show(DdcPluginSettingsDialog *dialog);

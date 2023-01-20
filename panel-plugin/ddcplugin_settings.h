@@ -10,6 +10,7 @@
 #define STEP_SIZE_VOLUME "step-size-volume"
 
 G_DECLARE_FINAL_TYPE(DdcPluginSettings, ddcplugin_settings, DDCPLUGIN, SETTINGS, GObject);
+#define DDCPLUGIN_TYPE_SETTINGS ddcplugin_settings_get_type()
 
 DdcPluginSettings *ddcplugin_settings_new(const gchar *property_base);
 

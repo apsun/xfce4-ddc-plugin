@@ -9,6 +9,7 @@
 #include "ddcplugin_display.h"
 #include "ddcplugin_settings.h"
 #include "ddcplugin_keybind.h"
+#include "ddcplugin_panel_widget.h"
 #include "ddcplugin_settings_dialog.h"
 
 typedef struct {
@@ -17,25 +18,9 @@ typedef struct {
     DdcPluginDisplay *display_list;
     DdcPluginSettings *settings;
     DdcPluginKeybind *keybind;
-    GtkWidget *widget;
+    DdcPluginPanelWidget *panel_widget;
     DdcPluginSettingsDialog *settings_dialog;
 } DdcPlugin;
-
-static GtkWidget *
-ddcplugin_create_and_show_widget(XfcePanelPlugin *plugin)
-{
-    GtkWidget *button;
-    GtkWidget *icon;
-
-    button = xfce_panel_create_toggle_button();
-    gtk_container_add(GTK_CONTAINER(plugin), button);
-
-    icon = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
-    gtk_container_add(GTK_CONTAINER(button), icon);
-
-    gtk_widget_show_all(GTK_WIDGET(plugin));
-    return button;
-}
 
 static void
 ddcplugin_free(DdcPlugin *ddcplugin)
@@ -45,9 +30,9 @@ ddcplugin_free(DdcPlugin *ddcplugin)
         g_object_unref(ddcplugin->settings_dialog);
     }
 
-    // Destroy panel button
-    if (ddcplugin->widget != NULL) {
-        gtk_widget_destroy(ddcplugin->widget);
+    // Destroy panel widget
+    if (ddcplugin->panel_widget != NULL) {
+        gtk_widget_destroy(GTK_WIDGET(ddcplugin->panel_widget));
     }
 
     // Unregister keybinds
@@ -87,9 +72,10 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     ddcplugin = g_malloc(sizeof(*ddcplugin));
     ddcplugin->plugin = plugin;
     ddcplugin->raw_display_list = NULL;
-    ddcplugin->widget = NULL;
     ddcplugin->display_list = NULL;
     ddcplugin->settings = NULL;
+    ddcplugin->keybind = NULL;
+    ddcplugin->panel_widget = NULL;
     ddcplugin->settings_dialog = NULL;
     g_signal_connect_swapped(
         G_OBJECT(plugin),
@@ -118,9 +104,11 @@ ddcplugin_new(XfcePanelPlugin *plugin)
         ddcplugin->display_list,
         ddcplugin->settings);
 
-    // Create panel button
-    ddcplugin->widget = ddcplugin_create_and_show_widget(plugin);
-    xfce_panel_plugin_add_action_widget(plugin, ddcplugin->widget);
+    // Create panel widget
+    ddcplugin->panel_widget = ddcplugin_panel_widget_new(ddcplugin->display_list);
+    gtk_container_add(GTK_CONTAINER(plugin), GTK_WIDGET(ddcplugin->panel_widget));
+    gtk_widget_show_all(GTK_WIDGET(plugin));
+    xfce_panel_plugin_add_action_widget(plugin, GTK_WIDGET(ddcplugin->panel_widget));
 
     // Enable settings dialog menu item
     ddcplugin->settings_dialog = ddcplugin_settings_dialog_new(ddcplugin->settings);

@@ -9,9 +9,9 @@
 struct _DdcPluginPanelWidget {
     GtkBin __parent__;
 
-    GtkWidget *button;
-
     DdcPluginDisplay *display_list;
+
+    GtkWidget *button;
 };
 
 G_DEFINE_TYPE(DdcPluginPanelWidget, ddcplugin_panel_widget, GTK_TYPE_BIN);
@@ -20,6 +20,8 @@ static void
 ddcplugin_panel_widget_init(DdcPluginPanelWidget *panel_widget)
 {
     GtkWidget *icon;
+
+    panel_widget->display_list = NULL;
 
     panel_widget->button = xfce_panel_create_toggle_button();
     gtk_container_add(GTK_CONTAINER(panel_widget), panel_widget->button);

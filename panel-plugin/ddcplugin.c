@@ -105,7 +105,7 @@ ddcplugin_new(XfcePanelPlugin *plugin)
         ddcplugin->settings);
 
     // Create panel widget
-    ddcplugin->panel_widget = ddcplugin_panel_widget_new(ddcplugin->display_list);
+    ddcplugin->panel_widget = ddcplugin_panel_widget_new(plugin, ddcplugin->display_list);
     gtk_container_add(GTK_CONTAINER(plugin), GTK_WIDGET(ddcplugin->panel_widget));
     gtk_widget_show_all(GTK_WIDGET(plugin));
     xfce_panel_plugin_add_action_widget(plugin, GTK_WIDGET(ddcplugin->panel_widget));

@@ -87,8 +87,8 @@ ddcplugin_new(XfcePanelPlugin *plugin)
     if (ddcdisplay_list_create(&ddcplugin->raw_display_list) < 0) {
          xfce_dialog_show_warning(
             NULL,
-            _("Please ensure your monitor supports DDC, the i2c_dev kernel "
-              "module is loaded, and your user is in the i2c group."),
+            _("Please ensure your monitor supports DDC and the i2c-dev "
+              "kernel module is loaded."),
             _("xfce4-ddc-plugin could not get display list"));
     }
 

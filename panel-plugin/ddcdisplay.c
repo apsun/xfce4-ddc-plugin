@@ -301,8 +301,7 @@ ddcdisplay_list_create(DdcDisplay **out_display_list)
 
         // Create the display object
         display = g_malloc(sizeof(*display));
-        display->next = *out_display_list;
-        *out_display_list = display;
+        display->next = NULL;
         display->info = *info;
         display->handle = NULL;
         display->update_thread = 0;
@@ -320,7 +319,8 @@ ddcdisplay_list_create(DdcDisplay **out_display_list)
         rc = ddca_open_display2(display->info.dref, true, &display->handle);
         if (rc < 0) {
             g_warning("failed to open display %s: %s", info->sn, ddca_rc_desc(rc));
-            goto error;
+            ddcdisplay_list_destroy(display);
+            continue;
         }
 
         // Read current display state
@@ -330,8 +330,13 @@ ddcdisplay_list_create(DdcDisplay **out_display_list)
                 "failed to load current values from display %s: %s",
                 info->sn,
                 ddca_rc_desc(rc));
-            goto error;
+            ddcdisplay_list_destroy(display);
+            continue;
         }
+
+        // Display looks valid, insert it into the list
+        display->next = *out_display_list;
+        *out_display_list = display;
 
         // Create update thread
         rc = pthread_create(

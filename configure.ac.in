@@ -68,7 +68,7 @@ XDT_CHECK_PACKAGE([LIBXFCE4UI], [libxfce4ui-2], [4.18.0])
 XDT_CHECK_PACKAGE([LIBXFCE4PANEL], [libxfce4panel-2.0], [4.18.0])
 XDT_CHECK_PACKAGE([XFCONF], [libxfconf-0], [4.18.0])
 XDT_CHECK_PACKAGE([KEYBINDER], [keybinder-3.0], [0.3.2])
-XDT_CHECK_PACKAGE([DDCUTIL], [ddcutil], [1.3.0])
+XDT_CHECK_PACKAGE([DDCUTIL], [ddcutil], [2.0.0])
 
 dnl ***********************************
 dnl *** Check for debugging support ***

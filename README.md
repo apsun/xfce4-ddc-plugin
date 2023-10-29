@@ -7,7 +7,7 @@ using hotkeys.
 
 - xfce4 >= 4.18
 - [keybinder](https://github.com/kupferlauncher/keybinder) >= 0.3.2
-- [ddcutil](https://github.com/rockowitz/ddcutil) >= 1.4.1
+- [ddcutil](https://github.com/rockowitz/ddcutil) >= 2.0.0
 
 ## Installation
 
@@ -16,13 +16,6 @@ After installing ddcutil, ensure that the udev rules are loaded:
 ```Bash
 sudo udevadm control --reload-rules
 sudo udevadm trigger
-```
-
-Load the `i2c-dev` kernel module immediately and at future boot:
-
-```Bash
-sudo modprobe i2c-dev
-sudo tee /etc/modules-load.d/i2c-dev.conf <<< i2c-dev
 ```
 
 Then, build and install the plugin:

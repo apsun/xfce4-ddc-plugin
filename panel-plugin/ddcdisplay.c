@@ -282,6 +282,13 @@ ddcdisplay_list_create(DdcDisplay **out_display_list)
 
     *out_display_list = NULL;
 
+    // Initialize libddcutil
+    rc = ddca_init2(NULL, DDCA_SYSLOG_DEBUG, DDCA_INIT_OPTIONS_NONE, NULL);
+    if (rc < 0) {
+        g_warning("failed to initialize libddcutil");
+        goto error;
+    }
+
     // Get list of available displays
     rc = ddca_get_display_info_list2(false, &info_list);
     if (rc < 0) {
